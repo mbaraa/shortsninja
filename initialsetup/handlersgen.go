@@ -7,94 +7,37 @@ import (
 	"strings"
 )
 
+// GenerateMuxFileUsingURLsFile generates a multiplexer file from a given short URLs text file
+// returns the short URLs slice for later use, and an occurred error{io}
+//
 // TODO
-// write more docs
-// I swear I will write :)
-
-func GenerateAllUsingURLsFile(urlsFile *os.File) error {
+// reject non-valid short URLs file
+func GenerateMuxFileUsingURLsFile(urlsFile *os.File) ([]string, error) {
 	rawURLs, err := ioutil.ReadAll(urlsFile)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	urls := strings.Split(string(rawURLs), "\n")
-	err = GenerateAll(urls)
+	err = GenerateMuxFile(urls)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	// happily ever after
-	return nil
+	return urls, nil
 }
 
-// GenerateAll generates url handlers and a proper multiplexer
-func GenerateAll(urls []string) error {
-	err := GenerateMultiplexerFile(urls)
-	if err != nil {
-		return err
-	}
-	err = GenerateHandlerFunctionsFile(urls)
-	if err != nil {
-		return err
-	}
+// GenerateMuxFile generates urls multiplexer from a given short URLs string slice :)
+// returns an occurred error{io}
+// TODO
+// append urls handlers instead of overriding!
+func GenerateMuxFile(urls []string) error {
+	// error ignored since it's only {file exists}
+	_ = os.Mkdir("./mux", 0755)
 
-	// happily ever after
-	return nil
-}
-
-// GenerateHandlerFunctionsFile generates a handlers' file
-func GenerateHandlerFunctionsFile(urls []string) error {
-	f, err := os.Create("./handlers/handlers.go")
-	if err != nil {
-		return err
-	}
-
-	handlersFileContent := `package handlers
-
-import (
-	"github.com/baraa-almasri/useless/songs"
-	"io/ioutil"
-	"net/http"
-)
-
-func getFullURL(shortURL string) string {
-	url, _ := ioutil.ReadFile("./urls/" + shortURL)
-	return string(url)
-}
-
-func handle_play_meme_song(w http.ResponseWriter, r *http.Request) {
-	http.Redirect(w, r, songs.NewMemeSongs().GetRandomSong(), http.StatusFound)
-}
-
-func handle_rick_roll(w http.ResponseWriter, r *http.Request) {
-	http.Redirect(w, r, "https://www.youtube.com/watch?v=dQw4w9WgXcQ", http.StatusFound)
-}
-`
-	for _, shortURL := range urls {
-		handlersFileContent += generateHandlerFunction(shortURL)
-	}
-
-	_, err = f.Write([]byte(handlersFileContent))
-	if err != nil {
-		return err
-	}
-
-	// happily ever after
-	return nil
-}
-
-// generateHandlerFunction
-func generateHandlerFunction(shortURL string) string {
-	return fmt.Sprintf(`
-func handle_%s(w http.ResponseWriter, r *http.Request) {
-	url := getFullURL("%s")
-	http.Redirect(w, r, url, http.StatusFound)
-}`, shortURL, shortURL)
-}
-
-// GenerateMultiplexerFile generates urls multiplexer from a given map :)
-func GenerateMultiplexerFile(urls []string) error {
-	f, err := os.Create("./handlers/multiplexer.go")
+	f, err := os.Create("./mux/mux.go")
+	defer f.Close()
 	if err != nil {
 		return err
 	}
@@ -102,7 +45,7 @@ func GenerateMultiplexerFile(urls []string) error {
 	muxFileCont := getMuxPrefix()
 
 	for _, shortURL := range urls {
-		muxFileCont += generateHandlerStatement(shortURL)
+		muxFileCont += generateHandlerStatement(shortURL, generateHandlerFunction(shortURL))
 	}
 	muxFileCont += "\n}"
 
@@ -115,16 +58,29 @@ func GenerateMultiplexerFile(urls []string) error {
 	return nil
 }
 
+// generateHandlerFunction returns a handler function of the given short URL that will be used in the multiplexer
+func generateHandlerFunction(shortURL string) string {
+	return fmt.Sprintf(`func (w http.ResponseWriter, r *http.Request) {
+		url := getFullURL("%s")
+		http.Redirect(w, r, url, http.StatusFound)
+	}`, shortURL)
+}
+
 // generateHandlerStatement returns a handling statement for a given short url
-func generateHandlerStatement(shortURL string) string {
-	return fmt.Sprintf("\n\tmux.HandleFunc(\"/%s/\", handle_%s)", shortURL, shortURL)
+func generateHandlerStatement(shortURL, handlerFunc string) string {
+	return fmt.Sprintf("\n\tmux.HandleFunc(\"/%s/\", %s)", shortURL, handlerFunc)
 }
 
 // getMuxPrefix returns multiplexer file content before the handling statements
+// much wow!
 func getMuxPrefix() string {
-	return `package handlers
+	return `// auto generated file
+// generated at server's initialization!
+package handlers 
 
 import (
+	"github.com/baraa-almasri/useless/songs"
+	"io/ioutil"
 	"net/http"
 )
 
@@ -137,8 +93,21 @@ func GetMux() *http.ServeMux {
 	return mux
 }
 
+func getFullURL(shortURL string) string {
+	url, err := ioutil.ReadFile("./urls/" + shortURL)
+	if err != nil {
+		return "/play_meme_song/"
+	}
+	return string(url)
+}
+
 func bunchHandle() {
-	mux.HandleFunc("/play_meme_song/", handle_play_meme_song)
-	mux.HandleFunc("/no_url/", handle_rick_roll)
+	mux.HandleFunc("/play_meme_song/", func (w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, songs.NewMemeSongs().GetRandomSong(), http.StatusFound)
+	})
+
+	mux.HandleFunc("/no_url/", func (w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "https://www.youtube.com/watch?v=dQw4w9WgXcQ", http.StatusFound)
+	})
 `
 }
