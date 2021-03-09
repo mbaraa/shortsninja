@@ -1,8 +1,12 @@
 package handlers
 
-import "net/http"
+import (
+	"net/http"
+)
 
-var mux = &http.ServeMux{}
+var (
+	mux = http.NewServeMux()
+)
 
 func GetMux() *http.ServeMux {
 	bunchHandle()
@@ -10,6 +14,7 @@ func GetMux() *http.ServeMux {
 }
 
 func bunchHandle() {
-	mux.HandleFunc("/dummy", handle_dummy)
+	mux.HandleFunc("/play_meme_song/", handle_play_meme_song)
+	mux.HandleFunc("/no_url/", handle_rick_roll)
 
 }

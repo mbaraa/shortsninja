@@ -6,8 +6,6 @@ import (
 )
 
 func main() {
-
 	mux := handlers.GetMux()
-	http.ListenAndServe(":9797", mux)
-
+	http.ListenAndServe(":8080", mux)
 }
