@@ -2,9 +2,8 @@ package initialsetup
 
 import (
 	"fmt"
-	"io/ioutil"
+	"github.com/baraa-almasri/shortsninja/globals"
 	"os"
-	"strings"
 )
 
 // GenerateMuxFileUsingURLsFile generates a multiplexer file from a given short URLs text file
@@ -13,13 +12,8 @@ import (
 // TODO
 // reject non-valid short URLs file
 func GenerateMuxFileUsingURLsFile(urlsFile *os.File) ([]string, error) {
-	rawURLs, err := ioutil.ReadAll(urlsFile)
-	if err != nil {
-		return nil, err
-	}
-
-	urls := strings.Split(string(rawURLs), "\n")
-	err = GenerateMuxFile(urls)
+	urls := globals.ShortURLs
+	err := GenerateMuxFile(urls)
 	if err != nil {
 		return nil, err
 	}
@@ -74,9 +68,7 @@ func generateHandlerStatement(shortURL, handlerFunc string) string {
 // getMuxPrefix returns multiplexer file content before the handling statements
 // much wow!
 func getMuxPrefix() string {
-	return `// auto generated file
-// generated at server's initialization!
-package handlers 
+	return `package handlers
 
 import (
 	"github.com/baraa-almasri/useless/songs"
