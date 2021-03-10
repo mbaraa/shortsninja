@@ -12,6 +12,7 @@ var (
 	UsedShortURLs []string
 )
 
+// LoadGlobals initializes ShortURLs and UsedShortURLs using the given urls file and the content of `./urls` directory
 func LoadGlobals(urlsFile *os.File) ([]string, []string, error) {
 	shorts, err := loadShortURLs(urlsFile)
 	if err != nil {
