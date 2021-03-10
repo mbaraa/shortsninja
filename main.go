@@ -5,6 +5,7 @@ import (
 	"github.com/baraa-almasri/shortsninja/globals"
 	"github.com/baraa-almasri/shortsninja/handlers"
 	"github.com/baraa-almasri/shortsninja/initialsetup"
+	"github.com/gorilla/mux"
 	"log"
 	"net/http"
 	"os"
@@ -57,16 +58,21 @@ func main() {
 			f, _ = os.OpenFile(fileName, os.O_WRONLY, 0755)
 		}
 
-		initialsetup.GenerateMuxFileUsingURLsFile(f)
-
 		break
 	case "start":
 		f, _ := os.Open("./urls.txt")
 		_, _, _ = globals.LoadGlobals(f)
-		mux := handlers.GetMux()
-		mux.HandleFunc("/shorten/", handlers.AddURL)
-		log.Fatal(http.ListenAndServe(":8080", mux))
+		m := mux.NewRouter()
+		m.HandleFunc("/shorten", handlers.AddURL).Methods("GET")
+		m.HandleFunc("/play_meme_song/", handlers.PlayMemeSong).Methods("GET")
+		m.HandleFunc("/no_url", handlers.RickRoll).Methods("GET")
+		m.HandleFunc("/{[A-Z;0-9;a-z]{4}}", handlers.GetURL).Methods("GET")
 
+		m.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+			w.Write([]byte("nothing to see here!"))
+		})
+
+		log.Fatal(http.ListenAndServe(":8080", m))
 		break
 	default:
 		println("hmm, that's wrong ain't it?")
