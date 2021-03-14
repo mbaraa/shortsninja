@@ -5,6 +5,7 @@ import (
 	"github.com/baraa-almasri/useless/songs"
 	"io/ioutil"
 	"os"
+	"strings"
 )
 
 var (
@@ -14,7 +15,7 @@ var (
 // getFullURL retrieves a URL from its corresponding shortURL file
 func getFullURL(shortURL string) string {
 	url, err := ioutil.ReadFile("./urls/" + shortURL)
-	if err != nil {
+	if err != nil || strings.Contains(shortURL, ".") { // wow, much security!
 		return "/play_meme_song/"
 	}
 	return string(url)
