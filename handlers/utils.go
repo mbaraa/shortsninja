@@ -21,22 +21,11 @@ func getFullURL(shortURL string) string {
 	return string(url)
 }
 
-// elementExistInArr returns true if the given element exists in the given slice
-func elementExistInArr(element string, slice []string) bool {
-	for i := range slice {
-		if slice[i] == element {
-			return true
-		}
-	}
-
-	return false
-}
-
 // createAndUpdate creates a new url file that doesn't exist in the usedURLs slice and updates the usedURLs slice
 // and returns the assigned short URL
 func createAndUpdate(url string) string {
 	for _, v := range globals.ShortURLs {
-		if !elementExistInArr(v, globals.UsedShortURLs) {
+		if !globals.IsShortURLUsed(v) {
 			f, _ := os.Create("./urls/" + v)
 			_, _ = f.Write([]byte(url))
 			_ = f.Close()
