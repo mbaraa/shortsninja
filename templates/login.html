@@ -1,0 +1,27 @@
+{{ define "login" }}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+    <script>
+        const xhttp = new XMLHttpRequest();
+        let cookie = document.cookie;
+
+        xhttp.open("GET", "/check_session/?" + cookie, false);
+        xhttp.setRequestHeader("Access-Control-Allow-Origin", "*")
+        xhttp.send();
+        console.log(xhttp.response);
+        window.open(xhttp.response, "_self");
+
+    </script>
+</head>
+<body style="background-color: #a89dcf;">
+
+<h1 align="center">Hello {{.User}}</h1>
+<form action="/login/">
+    <button formaction="/login/"> Login With Google! </button>
+</form>
+</body>
+</html>
+{{ end }}
