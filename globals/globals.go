@@ -1,6 +1,8 @@
 package globals
 
 import (
+	"github.com/baraa-almasri/shortsninja/db"
+	"html/template"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -10,6 +12,8 @@ import (
 var (
 	ShortURLs     []string
 	UsedShortURLs []string
+	DBManager     db.Database
+	Templates     *template.Template
 )
 
 // LoadGlobals initializes ShortURLs and UsedShortURLs using the given urls file and the content of `./urls` directory
