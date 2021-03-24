@@ -12,6 +12,10 @@ type Database interface {
 	AddUser(user *models.User) error
 	RemoveUser(user *models.User) error
 	GetUser(user *models.User) (*models.User, error)
+
+	AddURLData(urlData *models.URLData) error
+	RemoveURLData(url *models.URL) error
+	GetURLData(url *models.URL) ([]*models.URLData, error)
 }
 
 // TODO

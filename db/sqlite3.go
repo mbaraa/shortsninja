@@ -58,6 +58,14 @@ func mustInitSQLiteDB(db *sql.DB) {
 		IP VARCHAR(15)   
 	);`)
 
+	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS 
+	URL_DATA (
+	    short VARCHAR(5),
+	    IP VARCHAR(15),
+	    user_agent VARCHAR(255),
+	    visit_location VARCHAR(50),
+	    visit_time TIMESTAMP
+	);`)
 }
 
 // AddURL add a new url entry to the database
@@ -167,4 +175,53 @@ func (s *SQLite) GetUser(user *models.User) (*models.User, error) {
 
 	// happily ever after
 	return u, nil
+}
+
+// AddURLData adds data of a certain url, and returns an occurred error
+func (s *SQLite) AddURLData(urlData *models.URLData) error {
+	_, err := s.manager.Exec(
+		`INSERT INTO URL_DATA (short, IP, user_agent, visit_location, visit_time) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)`,
+		urlData.ShortURL, urlData.IP, urlData.UserAgent, urlData.VisitLocation)
+	if err != nil {
+		return err
+	}
+
+	// happily ever after
+	return nil
+}
+
+// RemoveURLData removes all the data of a given URL, and returns an occurred error
+func (s *SQLite) RemoveURLData(url *models.URL) error {
+	_, err := s.manager.Exec(
+		`DELETE FROM URL_DATA WHERE short=?)`, url.Short)
+	if err != nil {
+		return err
+	}
+
+	// happily ever after
+	return nil
+}
+
+// GetURLData returns a slice of URLData of the given URL and an occurred error
+func (s *SQLite) GetURLData(url *models.URL) ([]*models.URLData, error) {
+	rows, err := s.manager.Query(`SELECT * FROM URL_DATA WHERE short=?`, url.Short)
+	if err != nil {
+		return nil, err
+	}
+
+	var urlDatas []*models.URLData
+	var urlData *models.URLData
+
+	for rows.Next() {
+		urlData = new(models.URLData)
+
+		err = rows.Scan(&urlData.ShortURL, &urlData.IP, &urlData.UserAgent, &urlData.VisitLocation, &urlData.VisitTime)
+		if err != nil {
+			return nil, err
+		}
+		urlDatas = append(urlDatas, urlData)
+	}
+
+	// happily ever after
+	return urlDatas, nil
 }

@@ -59,10 +59,11 @@ func getFullURL(shortURL string) string {
 }
 
 // getRequestData returns a map with the needed request headers
-func getRequestData(req *http.Request) map[string]string {
-	return map[string]string{
-		"location":   getIPLocation(req.Header.Get("X-FORWARDED-FOR")),
-		"user_agent": req.Header.Get("User-Agent"),
+func getRequestData(req *http.Request) *models.URLData {
+	return &models.URLData{
+		IP:            req.Header.Get("X-FORWARDED-FOR"),
+		VisitLocation: getIPLocation(req.Header.Get("X-FORWARDED-FOR")),
+		UserAgent:     req.Header.Get("User-Agent"),
 	}
 }
 

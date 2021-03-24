@@ -32,8 +32,10 @@ func GetURL(w http.ResponseWriter, r *http.Request) {
 	}
 
 	url := getFullURL(r.URL.Path[1:])
-	//data := getRequestData(r)
-	//data["url"] = url
+	data := getRequestData(r)
+	data.ShortURL = r.URL.Path[1:]
+
+	_ = globals.DBManager.AddURLData(data)
 
 	http.Redirect(w, r, url, http.StatusFound)
 }
