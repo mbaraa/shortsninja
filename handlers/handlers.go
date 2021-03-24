@@ -21,7 +21,7 @@ func AddURL(w http.ResponseWriter, r *http.Request) {
 	})
 
 	_ = json.NewEncoder(w).Encode(&models.URL{
-		Short:   short,
+		Short:   "http://shorts.ninja/" + short,
 		FullURL: url,
 	})
 }
@@ -55,10 +55,19 @@ func RickRoll(w http.ResponseWriter, r *http.Request) {
 }
 
 func HandleHome(w http.ResponseWriter, r *http.Request) {
-	globals.Templates.ExecuteTemplate(w, "shorten", &models.User{
-		Email:  "hexagon16.rpm@gmail.com",
-		Avatar: "https://i1.wp.com/tech-ish.com/wp-content/uploads/2014/10/Google-Logo.jpg?fit=1575%2C1575&ssl=1",
-	})
+	_ = globals.Templates.ExecuteTemplate(w, "shorten", getDummyUser())
+}
+
+func HandleTracking(w http.ResponseWriter, r *http.Request) {
+	_ = globals.Templates.ExecuteTemplate(w, "tracking", getDummyUser())
+}
+
+func HandleAbout(w http.ResponseWriter, r *http.Request) {
+	_ = globals.Templates.ExecuteTemplate(w, "about", getDummyUser())
+}
+
+func HandleUserInfo(w http.ResponseWriter, r *http.Request) {
+	_ = globals.Templates.ExecuteTemplate(w, "about", getDummyUser())
 }
 
 // TODO

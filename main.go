@@ -23,6 +23,10 @@ func main() {
 	m.HandleFunc("/{[A-Z;0-9;a-z]{5}}", handlers.GetURL).Methods("GET")
 
 	m.HandleFunc("/", handlers.HandleHome).Methods("GET")
+	m.HandleFunc("/about/", handlers.HandleAbout).Methods("GET")
+	m.HandleFunc("/tracking/", handlers.HandleTracking).Methods("GET")
+	m.HandleFunc("/user_info/", handlers.HandleUserInfo).Methods("GET")
+
 	//m.HandleFunc("/signup/", handlers.Signup).Methods("GET")
 	//m.HandleFunc("/check_session/", handlers.CheckSession).Methods("GET")
 	//m.HandleFunc("/login/", handlers.GoogleLogin).Methods("GET")

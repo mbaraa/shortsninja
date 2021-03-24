@@ -4,10 +4,39 @@
 <head>
     <meta charset="UTF-8">
     <title>Shorten a URL</title>
+    <script>window.alert("Oi Still not ready yet!")</script>
+    <style>
+        body, form, input, p{
+            font-family: Sans;
+        }
+    </style>
 </head>
 <body>
 
     {{ template "navbar" . }}
+    <br/><br/>
+
+    <script>
+        function shorten(url, user) {
+            const xhttp = new XMLHttpRequest();
+            xhttp.open("GET", "/shorten/?url=" + url + "&user=" + user, false);
+            xhttp.send();
+
+            const resp = JSON.parse(xhttp.responseText);
+            document.getElementById("short").textContent = resp["short"];
+        }
+    </script>
+
+    <fieldset>
+        <legend>Shorten a URL!</legend>
+        <form>
+            <input style="height: 75%; width: 60%" type="text" name="url" placeholder="URL to be shortened!">
+<!--            <input type="text" name="user" value="no_user" hidden>-->
+            <p id="short">Your short URL will appear here :)</p>
+
+            <input type="button" value="Shorten" onclick="shorten(url.value)">
+        </form>
+    </fieldset>
 
 </body>
 </html>
