@@ -9,16 +9,12 @@ import (
 	"html/template"
 	"log"
 	"net/http"
-	"os"
 )
 
 // still testing :)
 func main() {
 	globals.Templates, _ = template.ParseGlob("./templates/*.html")
 	globals.DBManager = db.NewSQLiteDB()
-
-	f, _ := os.Open("./urls.txt")
-	_, _, _ = globals.LoadGlobals(f)
 
 	m := mux.NewRouter()
 	m.HandleFunc("/shorten/", handlers.AddURL).Methods("GET")
@@ -27,10 +23,10 @@ func main() {
 	m.HandleFunc("/{[A-Z;0-9;a-z]{5}}", handlers.GetURL).Methods("GET")
 
 	m.HandleFunc("/", handlers.HandleHome).Methods("GET")
-	m.HandleFunc("/signup/", handlers.Signup).Methods("GET")
-	m.HandleFunc("/check_session/", handlers.CheckSession).Methods("GET")
-	m.HandleFunc("/login/", handlers.GoogleLogin).Methods("GET")
-	m.HandleFunc("/login_callback/", handlers.HandleCallback).Methods("GET")
+	//m.HandleFunc("/signup/", handlers.Signup).Methods("GET")
+	//m.HandleFunc("/check_session/", handlers.CheckSession).Methods("GET")
+	//m.HandleFunc("/login/", handlers.GoogleLogin).Methods("GET")
+	//m.HandleFunc("/login_callback/", handlers.HandleCallback).Methods("GET")
 
 	corsHandler := cors.Default().Handler(m)
 
