@@ -18,9 +18,8 @@ func main() {
 
 	m := mux.NewRouter()
 	m.HandleFunc("/shorten/", handlers.AddURL).Methods("GET")
-	m.HandleFunc("/play_meme_song/", handlers.PlayMemeSong).Methods("GET")
 	m.HandleFunc("/no_url/", handlers.RickRoll).Methods("GET")
-	m.HandleFunc("/{[A-Z;0-9;a-z]{5}}", handlers.GetURL).Methods("GET")
+	m.HandleFunc("/{[A-Z;0-9;a-z]{4,5}}", handlers.GetURL).Methods("GET")
 
 	m.HandleFunc("/", handlers.HandleHome).Methods("GET")
 	m.HandleFunc("/about/", handlers.HandleAbout).Methods("GET")

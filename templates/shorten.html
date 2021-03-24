@@ -6,37 +6,47 @@
     <title>Shorten a URL</title>
     <script>window.alert("Oi Still not ready yet!")</script>
     <style>
-        body, form, input, p{
+        body, form, input, p {
             font-family: Sans;
         }
     </style>
 </head>
 <body>
 
-    {{ template "navbar" . }}
-    <br/><br/>
+{{ template "navbar" . }}
+<br/><br/>
 
-    <script>
-        function shorten(url, user) {
-            const xhttp = new XMLHttpRequest();
-            xhttp.open("GET", "/shorten/?url=" + url + "&user=" + user, false);
-            xhttp.send();
+<script>
+    function shorten(url) {
+        const xhttp = new XMLHttpRequest();
+        xhttp.open("GET", "/shorten/?url=" + url, false);
+        xhttp.send();
 
-            const resp = JSON.parse(xhttp.responseText);
-            document.getElementById("short").textContent = resp["short"];
+        const resp = JSON.parse(xhttp.responseText);
+        if (resp["valid_url"]) {
+            const short = document.getElementById("short");
+            short.href = resp["short"];
+            short.textContent = resp["short"];
+            short.style = "text-decoration: underline; color: #4285F4; font-size: 20px";
+        } else {
+            window.alert("enter a valid url!");
         }
-    </script>
+    }
+</script>
 
-    <fieldset>
-        <legend>Shorten a URL!</legend>
-        <form>
-            <input style="height: 75%; width: 60%" type="text" name="url" placeholder="URL to be shortened!">
-<!--            <input type="text" name="user" value="no_user" hidden>-->
-            <p id="short">Your short URL will appear here :)</p>
-
-            <input type="button" value="Shorten" onclick="shorten(url.value)">
-        </form>
-    </fieldset>
+<fieldset>
+    <legend>Shorten a URL!</legend>
+    <form>
+        <input style="height: 40px; width: 60%; font-size: 20px"
+               type="text" name="url" placeholder="Type/Paste a URL to be shortened!">
+        <!--            <input type="text" name="user" value="no_user" hidden>-->
+        <input style="height: 45px; width: min-content; font-size: 25px"
+               type="button" value="Shorten" onclick="shorten(url.value)">
+        <br/><br/>
+        <a style="font-size: 17px" id="short" href="/">Your short URL will appear here :)</a>
+        <br/><br/>
+    </form>
+</fieldset>
 
 </body>
 </html>

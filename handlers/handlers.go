@@ -8,45 +8,34 @@ import (
 	"github.com/baraa-almasri/shortsninja/models"
 	"io/ioutil"
 	"net/http"
-	"regexp"
 )
 
 // AddURL adds a URL to the short urls list and returns the assigned short url
 func AddURL(w http.ResponseWriter, r *http.Request) {
 	url := r.URL.Query()["url"][0]
-	user := r.URL.Query()["user"][0]
+	shortURL := createAndUpdate(url, &models.User{})
 
-	short := createAndUpdate(url, &models.User{
-		Email: user,
-	})
+	resp := make(map[string]interface{})
+	resp["url"] = url
+	resp["short"] = "http://shorts.ninja/" + shortURL
+	resp["valid_url"] = isURLValid(url)
 
-	_ = json.NewEncoder(w).Encode(&models.URL{
-		Short:   "http://shorts.ninja/" + short,
-		FullURL: url,
-	})
+	_ = json.NewEncoder(w).Encode(resp)
 }
 
 // GetURL redirects to the full URL from the given shortURL
-// if no url is assigned it plays a meme song :)
+// if no url is assigned or the short URL is not valid it rick rolls the caller :)
 func GetURL(w http.ResponseWriter, r *http.Request) {
-	// check if the short URL is actually valid!
-	shortURLPattern, _ := regexp.Compile("[A-Z;0-9;a-z]{5}")
-	shortURLPattern.FindString(r.URL.Path[1:])
-	if shortURLPattern.FindString(r.URL.Path[1:]) != r.URL.Path[1:] {
-		http.Redirect(w, r, "/play_meme_song/", http.StatusFound)
+	if !isShortURLValid(r.URL.Path[1:]) {
+		http.Redirect(w, r, "/no_url/", http.StatusFound)
 		return
 	}
 
-	url := getURLData(r.URL.Path[1:])
-	data := getRequestData(r)
-	data["url"] = url
+	url := getFullURL(r.URL.Path[1:])
+	//data := getRequestData(r)
+	//data["url"] = url
 
 	http.Redirect(w, r, url, http.StatusFound)
-}
-
-// PlayMemeSong plays a random meme song, wow!
-func PlayMemeSong(w http.ResponseWriter, r *http.Request) {
-	http.Redirect(w, r, memes.GetRandomSong(), http.StatusFound)
 }
 
 // RickRoll redirects to Rick Astley's - Never Gonna Give You Up YT Video, perfect RickRolling :)
