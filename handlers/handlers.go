@@ -17,7 +17,7 @@ func AddURL(w http.ResponseWriter, r *http.Request) {
 
 	resp := make(map[string]interface{})
 	resp["url"] = url
-	resp["short"] = "http://shorts.ninja/" + shortURL
+	resp["short"] = "shorts.ninja/" + shortURL
 	resp["valid_url"] = isURLValid(url)
 
 	_ = json.NewEncoder(w).Encode(resp)
@@ -58,7 +58,7 @@ func HandleAbout(w http.ResponseWriter, r *http.Request) {
 }
 
 func HandleUserInfo(w http.ResponseWriter, r *http.Request) {
-	_ = globals.Templates.ExecuteTemplate(w, "about", getDummyUser())
+	_ = globals.Templates.ExecuteTemplate(w, "tracking", getDummyUser())
 }
 
 // TODO
