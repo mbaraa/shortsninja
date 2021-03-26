@@ -8,14 +8,13 @@ import (
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 	"net/http"
-	"os"
 )
 
 var (
 	googleOauthConfig = &oauth2.Config{
-		RedirectURL:  os.Getenv("CALL_BACK_URL"),
-		ClientID:     os.Getenv("GOOGLE_CLIENT_ID"),
-		ClientSecret: os.Getenv("GOOGLE_CLIENT_SECRET"),
+		RedirectURL:  globals.Config.GoogleCallbackHandler,
+		ClientID:     globals.Config.GoogleClientID,
+		ClientSecret: globals.Config.GoogleClientSecret,
 		Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email"},
 		Endpoint:     google.Endpoint,
 	}
