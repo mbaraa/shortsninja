@@ -55,8 +55,12 @@ func mustInitSQLiteDB(db *sql.DB) {
 	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS 
 	SESSION (
 		token VARCHAR(32),
-		IP VARCHAR(15)   
+		IP VARCHAR(15),
+		user_email VARCHAR(255)
 	);`)
+	if err != nil {
+		panic(err)
+	}
 
 	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS 
 	URL_DATA (
@@ -66,6 +70,9 @@ func mustInitSQLiteDB(db *sql.DB) {
 	    visit_location VARCHAR(50),
 	    visit_time TIMESTAMP
 	);`)
+	if err != nil {
+		panic(err)
+	}
 }
 
 // AddURL add a new url entry to the database
@@ -159,6 +166,8 @@ func (s *SQLite) RemoveUser(user *models.User) error {
 	// the happily ever after
 	return nil
 }
+
+// GetUser returns an existing user from the database
 func (s *SQLite) GetUser(user *models.User) (*models.User, error) {
 	rows, err := s.manager.Query(`SELECT * FROM USER WHERE email=?;`, user.Email)
 	if err != nil {
@@ -224,4 +233,45 @@ func (s *SQLite) GetURLData(url *models.URL) ([]*models.URLData, error) {
 
 	// happily ever after
 	return urlDatas, nil
+}
+
+// AddSession adds a new session to the database
+func (s *SQLite) AddSession(sess *models.Session) error {
+	_, err := s.manager.Exec(`INSERT INTO SESSION (token, IP, user_email) VALUES (?, ? ,?)`,
+		sess.Token, sess.IP, sess.UserEmail)
+	if err != nil {
+		return err
+	}
+
+	// happily ever after
+	return nil
+}
+
+// RemoveSession a specific session from the database
+func (s *SQLite) RemoveSession(sess *models.Session) error {
+	_, err := s.manager.Exec(`DELETE FROM SESSION WHERE token=?`, sess.Token)
+	if err != nil {
+		return err
+	}
+
+	// happily ever after
+	return nil
+}
+
+// GetSession returns a specific session from the database
+func (s *SQLite) GetSession(token string) (*models.Session, error) {
+	rows, err := s.manager.Query(`SELECT * FROM SESSION WHERE token=?`, token)
+	if err != nil {
+		return nil, err
+	}
+
+	session := new(models.Session)
+	rows.Next()
+	err = rows.Scan(&session.Token, &session.IP, &session.UserEmail)
+	if err != nil {
+		return nil, err
+	}
+
+	// happily ever after
+	return session, nil
 }

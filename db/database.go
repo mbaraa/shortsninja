@@ -16,6 +16,10 @@ type Database interface {
 	AddURLData(urlData *models.URLData) error
 	RemoveURLData(url *models.URL) error
 	GetURLData(url *models.URL) ([]*models.URLData, error)
+
+	AddSession(sess *models.Session) error
+	RemoveSession(sess *models.Session) error
+	GetSession(token string) (*models.Session, error)
 }
 
 // TODO
