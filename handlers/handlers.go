@@ -1,25 +1,27 @@
 package handlers
 
 import (
-	"context"
 	"encoding/json"
-	"fmt"
 	"github.com/baraa-almasri/shortsninja/globals"
 	"github.com/baraa-almasri/shortsninja/models"
-	"io/ioutil"
 	"net/http"
 )
 
 // AddURL adds a URL to the short urls list and returns the assigned short url
 func AddURL(w http.ResponseWriter, r *http.Request) {
+	user := new(models.User)
+	if r.URL.Query()["token"] != nil {
+		user = getUser(r.URL.Query()["token"][0], r.Header.Get("X-FORWARDED-FOR"))
+	}
 	url := r.URL.Query()["url"][0]
-	shortURL := createAndUpdate(url, &models.User{})
 
 	resp := make(map[string]interface{})
-	resp["url"] = url
-	resp["short"] = "shorts.ninja/" + shortURL
-	resp["valid_url"] = isURLValid(url)
+	if resp["valid_url"] = isURLValid(url); resp["valid_url"].(bool) {
+		shortURL := createAndUpdate(url, user)
 
+		resp["url"] = url
+		resp["short"] = "shorts.ninja/" + shortURL
+	}
 	_ = json.NewEncoder(w).Encode(resp)
 }
 
@@ -40,95 +42,31 @@ func GetURL(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, url, http.StatusFound)
 }
 
+// HandleHome renders the shortening page of a specific or an anonymous user
+func HandleHome(w http.ResponseWriter, r *http.Request) {
+	ip, token := getIPAndToken(w, r)
+	renderPageFromSessionToken("shorten", token, ip, w, r)
+}
+
+// HandleTracking renders the URLs tracking page of a specific user
+func HandleTracking(w http.ResponseWriter, r *http.Request) {
+	ip, token := getIPAndToken(w, r)
+	renderPageFromSessionToken("tracking", token, ip, w, r)
+}
+
+// HandleAbout renders the about page
+func HandleAbout(w http.ResponseWriter, r *http.Request) {
+	ip, token := getIPAndToken(w, r)
+	renderPageFromSessionToken("about", token, ip, w, r)
+}
+
+// HandleUserInfo renders the user info page
+func HandleUserInfo(w http.ResponseWriter, r *http.Request) {
+	ip, token := getIPAndToken(w, r)
+	renderPageFromSessionToken("login", token, ip, w, r)
+}
+
 // RickRoll redirects to Rick Astley's - Never Gonna Give You Up YT Video, perfect RickRolling :)
 func RickRoll(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "https://www.youtube.com/watch?v=dQw4w9WgXcQ", http.StatusFound)
-}
-
-func HandleHome(w http.ResponseWriter, r *http.Request) {
-	_ = globals.Templates.ExecuteTemplate(w, "shorten", getDummyUser())
-}
-
-func HandleTracking(w http.ResponseWriter, r *http.Request) {
-	_ = globals.Templates.ExecuteTemplate(w, "tracking", getDummyUser())
-}
-
-func HandleAbout(w http.ResponseWriter, r *http.Request) {
-	_ = globals.Templates.ExecuteTemplate(w, "about", getDummyUser())
-}
-
-func HandleUserInfo(w http.ResponseWriter, r *http.Request) {
-	_ = globals.Templates.ExecuteTemplate(w, "tracking", getDummyUser())
-}
-
-// TODO
-// complete login and the other boiz :)
-func Login(w http.ResponseWriter, r *http.Request) {
-	token := &http.Cookie{
-		Name:  "token",
-		Value: "jherbvjlhr",
-	}
-	http.SetCookie(w, token)
-	globals.Templates.ExecuteTemplate(w, "login", nil)
-	//tmpl.Execute(w, data))
-	/*globals.Templates.ExecuteTemplate(w, "login.html", map[string]interface{}{
-		"User": "Blyat",
-	})*/
-}
-
-func GoogleLogin(w http.ResponseWriter, r *http.Request) {
-	state = randomizer.GetRandomAlphanumString(32)
-	url := googleOauthConfig.AuthCodeURL(state)
-	http.Redirect(w, r, url, http.StatusFound)
-}
-
-// HandleCallback is called when authenticating with google
-func HandleCallback(w http.ResponseWriter, r *http.Request) {
-	if r.FormValue("state") != state {
-		w.WriteHeader(http.StatusNotFound)
-		http.Redirect(w, r, "/", http.StatusFound)
-		fmt.Println("sup from state")
-		return
-	}
-
-	token, err := googleOauthConfig.Exchange(context.Background(), r.FormValue("code"))
-	if err != nil {
-		w.WriteHeader(http.StatusNotFound)
-		w.Write([]byte("couldn't get token!"))
-		http.Redirect(w, r, "/", http.StatusFound)
-		return
-	}
-
-	dataResponse, err := http.Get("https://www.googleapis.com/oauth2/v2/userinfo?access_token=" + token.AccessToken)
-	defer dataResponse.Body.Close()
-	if err != nil {
-		w.WriteHeader(http.StatusNotFound)
-		http.Redirect(w, r, "/", http.StatusFound)
-		return
-	}
-
-	content, err := ioutil.ReadAll(dataResponse.Body)
-	if err != nil {
-		w.WriteHeader(http.StatusNotFound)
-		w.Write([]byte("couldn't parse response!"))
-		http.Redirect(w, r, "/", http.StatusFound)
-		return
-	}
-
-	w.Write(content)
-}
-
-func CheckSession(w http.ResponseWriter, r *http.Request) {
-	println("cookie: ", r.FormValue("token"))
-	if r.FormValue("token") != "" {
-		http.Redirect(w, r, "/no_url/", http.StatusFound)
-		return
-		w.Write([]byte("https://google.com"))
-		return
-	}
-	w.Write([]byte(""))
-}
-
-func Signup(w http.ResponseWriter, r *http.Request) {
-
 }

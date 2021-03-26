@@ -26,12 +26,9 @@ func main() {
 	m.HandleFunc("/tracking/", handlers.HandleTracking).Methods("GET")
 	m.HandleFunc("/user_info/", handlers.HandleUserInfo).Methods("GET")
 
-	//m.HandleFunc("/signup/", handlers.Signup).Methods("GET")
-	//m.HandleFunc("/check_session/", handlers.CheckSession).Methods("GET")
-	//m.HandleFunc("/login/", handlers.GoogleLogin).Methods("GET")
-	//m.HandleFunc("/login_callback/", handlers.HandleCallback).Methods("GET")
+	m.HandleFunc("/login/", handlers.GoogleLogin).Methods("GET")
+	m.HandleFunc("/login_callback/", handlers.HandleCallback).Methods("GET")
 
 	corsHandler := cors.Default().Handler(m)
-
 	log.Fatal(http.ListenAndServe(":8080", corsHandler))
 }

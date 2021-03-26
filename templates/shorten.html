@@ -17,8 +17,14 @@
 
 <script>
     function shorten(url) {
+        let token = document.cookie;
+
+        if (token !== "") {
+            token = token.substring("token=".length);
+        }
         const xhttp = new XMLHttpRequest();
-        xhttp.open("GET", "/shorten/?url=" + url, false);
+        // load user data if existed!
+        xhttp.open("GET", "/shorten/?url=" + url + "&token=" + token, false);
         xhttp.send();
 
         const resp = JSON.parse(xhttp.responseText);

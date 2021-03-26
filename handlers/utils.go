@@ -6,32 +6,53 @@ import (
 	"github.com/baraa-almasri/shortsninja/globals"
 	"github.com/baraa-almasri/shortsninja/models"
 	"github.com/baraa-almasri/useless"
-	"golang.org/x/oauth2"
-	"golang.org/x/oauth2/google"
 	"net/http"
-	"os"
 	"regexp"
 	"strings"
 )
 
 var (
-	googleOauthConfig = &oauth2.Config{
-		RedirectURL:  os.Getenv("CALL_BACK_URL"),
-		ClientID:     os.Getenv("GOOGLE_CLIENT_ID"),
-		ClientSecret: os.Getenv("GOOGLE_CLIENT_SECRET"),
-		Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email"},
-		Endpoint:     google.Endpoint,
-	}
 	randomizer = useless.NewRandASCII()
-	state      = ""
 )
+
+// renderPageFromSessionToken generates the required web page with the given user's data
+func renderPageFromSessionToken(pageName, token, ip string, w http.ResponseWriter, r *http.Request) {
+	user := getUser(token, ip)
+
+	if r.URL.Query()["token"] != nil {
+		token = r.URL.Query()["token"][0]
+		user = getUser(token, ip)
+
+		if pageName == "shorten" {
+			http.SetCookie(w, &http.Cookie{
+				Name:  "token",
+				Value: token,
+			})
+		}
+	}
+
+	_ = globals.Templates.ExecuteTemplate(w, pageName, user)
+}
+
+func getIPAndToken(w http.ResponseWriter, r *http.Request) (ip, token string) {
+	token = ""
+	if r.Header.Get("Cookie") != "" {
+		token = r.Header.Get("Cookie")[len("token="):]
+		http.SetCookie(w, &http.Cookie{
+			Name:  "token",
+			Value: token,
+		})
+	}
+	ip = r.Header.Get("X-FORWARDED-FOR")
+
+	return
+}
 
 // createAndUpdate creates a new short url that doesn't exist in the db,
 // adds the new short URL to the database and returns the assigned short URL
 func createAndUpdate(url string, user *models.User) string {
 	// storing the generated short url so it can be returned :)
 	var newURL *models.URL
-
 	// loop until the generated short url doesn't exist in the db
 	for {
 		newURL = &models.URL{
@@ -43,7 +64,6 @@ func createAndUpdate(url string, user *models.User) string {
 			break
 		}
 	}
-
 	return newURL.Short
 }
 
@@ -98,6 +118,22 @@ func isURLValid(url string) bool {
 func isShortURLValid(short string) bool {
 	shortURLPattern, _ := regexp.Compile("[A-Z;0-9;a-z]{4,5}")
 	return short == shortURLPattern.FindString(short)
+}
+
+// getUser returns a user using the given session token, if no user exists
+// or the token doesn't match its previous IP it returns a dummy user with shorts ninja icon
+func getUser(token, ip string) *models.User {
+	realSession, err := globals.DBManager.GetSession(token)
+	if err != nil {
+		return getDummyUser()
+	}
+
+	user, _ := globals.DBManager.GetUser(&models.User{Email: realSession.UserEmail})
+
+	if user == nil || realSession == nil || realSession.IP != ip {
+		return getDummyUser()
+	}
+	return user
 }
 
 // getDummyUser returns an unsigned-in user!
