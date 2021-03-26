@@ -30,8 +30,12 @@ func renderPageFromSessionToken(pageName, token, ip string, w http.ResponseWrite
 			})
 		}
 	}
-
-	_ = globals.Templates.ExecuteTemplate(w, pageName, user)
+	tempData := map[string]string{
+		"Avatar":  user.Avatar,
+		"Email":   user.Email,
+		"FontB64": globals.Config.Font,
+	}
+	_ = globals.Templates.ExecuteTemplate(w, pageName, tempData)
 }
 
 func getIPAndToken(w http.ResponseWriter, r *http.Request) (ip, token string) {
@@ -89,7 +93,7 @@ func getRequestData(req *http.Request) *models.URLData {
 
 // getIPLocation return a string of the IP's location using ipinfo.io
 func getIPLocation(ip string) string {
-	resp, err := http.Get(fmt.Sprintf("https://ipinfo.io/%s?token=%s", ip, globals.IPInfoToken))
+	resp, err := http.Get(fmt.Sprintf("https://ipinfo.io/%s?token=%s", ip, globals.Config.IPInfoIoToken))
 	if err != nil {
 		return "NULL/NULL"
 	}

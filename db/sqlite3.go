@@ -55,7 +55,7 @@ func mustInitSQLiteDB(db *sql.DB) {
 	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS 
 	SESSION (
 		token VARCHAR(32),
-		IP VARCHAR(15),
+		IP VARCHAR(45),
 		user_email VARCHAR(255)
 	);`)
 	if err != nil {
@@ -65,7 +65,7 @@ func mustInitSQLiteDB(db *sql.DB) {
 	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS 
 	URL_DATA (
 	    short VARCHAR(5),
-	    IP VARCHAR(15),
+	    IP VARCHAR(45),
 	    user_agent VARCHAR(255),
 	    visit_location VARCHAR(50),
 	    visit_time TIMESTAMP
