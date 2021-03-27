@@ -47,7 +47,8 @@ func getIPAndToken(w http.ResponseWriter, r *http.Request) (ip, token string) {
 			Value: token,
 		})
 	}
-	ip = r.Header.Get("X-FORWARDED-FOR")
+	ip = getIP(r)
+	ip = ip[:strings.Index(ip, ":")]
 
 	return
 }
@@ -84,9 +85,10 @@ func getFullURL(shortURL string) string {
 
 // getRequestData returns a map with the needed request headers
 func getRequestData(req *http.Request) *models.URLData {
+	ip := getIP(req)
 	return &models.URLData{
-		IP:            req.Header.Get("X-FORWARDED-FOR"),
-		VisitLocation: getIPLocation(req.Header.Get("X-FORWARDED-FOR")),
+		IP:            ip[:strings.Index(ip, ":")],
+		VisitLocation: getIPLocation(ip[:strings.Index(ip, ":")]),
 		UserAgent:     req.Header.Get("User-Agent"),
 	}
 }
@@ -107,6 +109,16 @@ func getIPLocation(ip string) string {
 	}
 
 	return fmt.Sprintf("%s/%s", ipData["region"], ipData["country"])
+}
+
+// getIP gets a requests IP address by reading off the forwarded-for
+// header (for proxies) and falls back to use the remote address.
+func getIP(req *http.Request) string {
+	forwarded := req.Header.Get("X-FORWARDED-FOR")
+	if forwarded != "" {
+		return forwarded
+	}
+	return req.RemoteAddr
 }
 
 // isURLValid returns true when the given URL is valid

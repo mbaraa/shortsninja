@@ -5,13 +5,16 @@ import (
 	"github.com/baraa-almasri/shortsninja/globals"
 	"github.com/baraa-almasri/shortsninja/models"
 	"net/http"
+	"strings"
 )
 
 // AddURL adds a URL to the short urls list and returns the assigned short url
 func AddURL(w http.ResponseWriter, r *http.Request) {
 	user := new(models.User)
 	if r.URL.Query()["token"] != nil {
-		user = getUser(r.URL.Query()["token"][0], r.Header.Get("X-FORWARDED-FOR"))
+		callerIP := getIP(r)
+		callerIP = callerIP[:strings.Index(callerIP, ":")]
+		user = getUser(r.URL.Query()["token"][0], callerIP)
 	}
 	url := r.URL.Query()["url"][0]
 

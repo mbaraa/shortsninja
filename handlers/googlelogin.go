@@ -8,6 +8,7 @@ import (
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 	"net/http"
+	"strings"
 )
 
 var (
@@ -56,9 +57,11 @@ func HandleCallback(w http.ResponseWriter, r *http.Request) {
 	json.NewDecoder(dataResponse.Body).Decode(&data)
 
 	token1 := randomizer.GetRandomAlphanumString(32)
+	callerIP := getIP(r)
+	callerIP = callerIP[:strings.Index(callerIP, ":")]
 	_ = globals.DBManager.AddSession(&models.Session{
 		Token:     token1,
-		IP:        r.Header.Get("X-FORWARDED-FOR"),
+		IP:        callerIP,
 		UserEmail: data["email"].(string),
 	})
 
