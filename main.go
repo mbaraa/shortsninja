@@ -1,10 +1,9 @@
 package main
 
 import (
-	"github.com/baraa-almasri/shortsninja/db"
-	"github.com/baraa-almasri/shortsninja/globals"
-	"github.com/baraa-almasri/shortsninja/handlers"
-	"github.com/gorilla/mux"
+	"github.com/baraa-almasri/shortsninja/config"
+	"github.com/baraa-almasri/shortsninja/models"
+	"github.com/baraa-almasri/shortsninja/routes"
 	"github.com/rs/cors"
 	"html/template"
 	"log"
@@ -13,22 +12,12 @@ import (
 
 // still testing :)
 func main() {
-	globals.Templates, _ = template.ParseGlob("./templates/*.html")
-	globals.DBManager = db.NewSQLiteDB()
+	templates := template.Must(template.ParseGlob("./templates/*.html"))
+	dbManager := models.NewSQLiteDB()
+	conf := config.LoadConfig()
 
-	m := mux.NewRouter()
-	m.HandleFunc("/shorten/", handlers.AddURL).Methods("GET")
-	m.HandleFunc("/no_url/", handlers.RickRoll).Methods("GET")
-	m.HandleFunc("/{[A-Z;0-9;a-z]{4,5}}", handlers.GetURL).Methods("GET")
+	mux := routes.NewRouter(dbManager, templates, conf)
 
-	m.HandleFunc("/", handlers.HandleHome).Methods("GET")
-	m.HandleFunc("/about/", handlers.HandleAbout).Methods("GET")
-	m.HandleFunc("/tracking/", handlers.HandleTracking).Methods("GET")
-	m.HandleFunc("/user_info/", handlers.HandleUserInfo).Methods("GET")
-
-	m.HandleFunc("/login/", handlers.GoogleLogin).Methods("GET")
-	m.HandleFunc("/login_callback/", handlers.HandleCallback).Methods("GET")
-
-	corsHandler := cors.Default().Handler(m)
+	corsHandler := cors.Default().Handler(mux.GetRoutes())
 	log.Fatal(http.ListenAndServe(":8080", corsHandler))
 }
