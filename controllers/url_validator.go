@@ -16,7 +16,7 @@ func NewURLValidator() *URLValidator {
 // IsURLValid returns true when the given URL is valid
 func (*URLValidator) IsURLValid(url string) bool {
 	validURLPatt := regexp.MustCompile(
-		`[a-z;0-9]{0,255}[.]?[a-z;0-9]{1,255}[.][a-z;0-9]{1,255}[:]?[0-9]{0,5}[a-z;A-Z;0-9;&;=;#;/;?;-;.]{1,1000}`)
+		`[a-z0-9]{0,255}[.]?[a-z0-9]{1,255}[.][a-z0-9]{1,255}[:]?[0-9]{0,5}[a-zA-Z0-9/$\-_.+!*‘(),#?=:%]{1,1000}`)
 
 	return (strings.HasPrefix(url, "http://") || strings.HasPrefix(url, "https://") ||
 		strings.HasPrefix(url, "ftp://")) && (validURLPatt.MatchString(url))
@@ -24,6 +24,6 @@ func (*URLValidator) IsURLValid(url string) bool {
 
 // IsShortURLValid returns true when the short url is valid
 func (*URLValidator) IsShortURLValid(short string) bool {
-	shortURLPattern, _ := regexp.Compile("[A-Z;0-9;a-z]{4,5}")
+	shortURLPattern, _ := regexp.Compile(`[A-Z0-9a-z\-]{4,5}`)
 	return short == shortURLPattern.FindString(short)
 }
