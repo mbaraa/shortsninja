@@ -32,6 +32,10 @@ func NewURLManager(urlValidator *URLValidator, requestDataManager *RequestDataMa
 
 // CreateShortURL adds a new short URL to the database
 func (um *URLManager) CreateShortURL(url string, user *models.User) string {
+	if existingURL := um.getShortURL(url, user); existingURL != nil {
+		return existingURL.Short
+	}
+
 	newURL := &models.URL{
 		Short:     um.createUniqueShortURL(5),
 		FullURL:   url,
@@ -44,7 +48,7 @@ func (um *URLManager) CreateShortURL(url string, user *models.User) string {
 	return newURL.Short
 }
 
-// createUniqueShortURL
+// createUniqueShortURL returns a string of specified length form a generated UUID4 string
 func (um *URLManager) createUniqueShortURL(length int) string {
 	uuidGen := uuid.New()
 	short := strings.ReplaceAll(uuidGen.String(), "-", "")
@@ -53,6 +57,26 @@ func (um *URLManager) createUniqueShortURL(length int) string {
 	lastIndex := rand.Intn(len(short)-length+1) + length
 
 	return short[lastIndex-length : lastIndex]
+}
+
+// checkURLExistence returns true if the URL exists for a certain user, and false otherwise
+func (um *URLManager) checkURLExistence(fullURL string, user *models.User) bool {
+	return um.getShortURL(fullURL, user) != nil
+}
+
+// getShortURL returns a pointer to an existing URL struct, and nil otherwise
+func (um *URLManager) getShortURL(fullURL string, user *models.User) *models.URL {
+	urls, err := um.db.GetURLs(user)
+	if err != nil {
+		return nil
+	}
+
+	for _, url := range urls {
+		if url.FullURL == fullURL {
+			return url
+		}
+	}
+	return nil
 }
 
 // GetFullURL returns the full URL for the given short URL
