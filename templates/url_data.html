@@ -1,0 +1,53 @@
+{{ define "url_data" }}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>http://shorts.ninja/{{ .Short }} Data</title>
+</head>
+<body>
+
+{{ template "navbar" . }}
+<br/><br/>
+
+{{ if .Email }}
+
+<table border="1" style="border-collapse: collapse; border-color: #4285F4;
+       width: 100%; height: 10%; box-shadow: 0 0 10px 5px #4285F4;
+       font-family: Sans; font-size: 15px;">
+    <tr>
+        <th colspan="1">IP</th>
+        <th colspan="1">User Agent</th>
+        <th colspan="1">Visit Location</th>
+        <th colspan="1">Visit Time</th>
+    </tr>
+    {{ range .URLData }}
+
+    <tr>
+        <td colspan="1" style=" color: #4285F4;">&nbsp; {{ .IP }}</td>
+        <td colspan="1" style=" color: #4285F4;">&nbsp; {{ .UserAgent }}</td>
+        <td colspan="1" style=" color: #4285F4;">&nbsp; {{ .VisitLocation }}</td>
+        <td colspan="1" style=" color: #4285F4;">&nbsp; {{ .VisitTime }}</td>
+
+    </tr>
+
+    {{ end }}
+</table>
+
+{{ else }}
+
+<fieldset style="border-color: #4285F4; box-shadow: 0 0 10px 5px #4285F4">
+    <h2 style="font-family: Sans; color: #4285F4;">Hmm... You need to be logged in to track URL data!</h2>
+    <form action="/login/">
+        <input type="submit" style="height: 45px; width: min-content; font-size: 25px; font-family: Sans"
+               value="Login With Google!">
+    </form>
+    <br/>
+</fieldset>
+
+{{ end }}
+<br/>
+
+</body>
+</html>
+{{ end }}

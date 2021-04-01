@@ -57,13 +57,19 @@ func (um *URLManager) createUniqueShortURL(length int) string {
 
 // GetFullURL returns the full URL for the given short URL
 func (um *URLManager) GetFullURL(shortURL string) string {
-	url, err := um.db.GetURL(shortURL)
-	if err != nil {
-		return "/no_url/" // get rick rolled :)
-	}
+	url := um.GetURL(shortURL)
 
 	// happily ever after
 	return url.FullURL
+}
+
+// GetURL returns a url as is from the database if no url exists, well the caller gets rick rolled :)
+func (um *URLManager) GetURL(shortURL string) *models.URL {
+	url, err := um.db.GetURL(shortURL)
+	if err != nil {
+		return &models.URL{FullURL: "/no_url/"} // get rick rolled :)
+	}
+	return url
 }
 
 // GetURLData returns a slice of URLData of the given URL

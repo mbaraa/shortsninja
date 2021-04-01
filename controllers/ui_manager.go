@@ -60,6 +60,31 @@ func (ui *UIManager) HandleTracking(res http.ResponseWriter, req *http.Request) 
 	})
 }
 
+// HandleURLDataTracking renders the URLs tracking page of a specific user
+func (ui *UIManager) HandleURLDataTracking(res http.ResponseWriter, req *http.Request) {
+	user := ui.userManager.GetUserFromToken(req)
+	ui.userManager.SetToken(res, req)
+
+	urlData := make([]*models.URLData, 1)
+	if shortURL := req.URL.Query()["short"]; user.Email != "" && shortURL != nil {
+		url := ui.urlManager.GetURL(shortURL[0])
+		if user.Email != url.UserEmail {
+			goto ignoreData
+		}
+		urlData = ui.urlManager.GetURLData(url)
+
+	}
+
+ignoreData:
+	// no error to be handled since it's being called by the router only :)
+	_ = ui.templates.ExecuteTemplate(res, "url_data", map[string]interface{}{
+		"Avatar":  user.Avatar,
+		"Email":   user.Email,
+		"FontB64": ui.conf.Font,
+		"URLData": urlData,
+	})
+}
+
 // HandleUserInfo renders the user info page
 func (ui *UIManager) HandleUserInfo(res http.ResponseWriter, req *http.Request) {
 

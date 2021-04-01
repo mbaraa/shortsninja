@@ -101,6 +101,10 @@ func (router *Router) removeURL(res http.ResponseWriter, req *http.Request) {
 	router.urlManager.RemoveURL(req.URL.Query()["short"][0], req)
 }
 
+func (router *Router) getURLData(res http.ResponseWriter, req *http.Request) {
+	router.uiManager.HandleURLDataTracking(res, req)
+}
+
 // rickRoll redirects to Rick Astley's - Never Gonna Give You Up YT Video, perfect RickRolling :)
 // GET /no_url/
 func (router *Router) rickRoll(res http.ResponseWriter, req *http.Request) {
@@ -119,6 +123,7 @@ func (router *Router) handleUI() {
 	router.multiplexer.HandleFunc("/about/", router.uiManager.GetPageByName("about")).Methods("GET")
 	router.multiplexer.HandleFunc("/tracking/", router.uiManager.HandleTracking).Methods("GET")
 	router.multiplexer.HandleFunc("/user_info/", router.uiManager.HandleUserInfo).Methods("GET")
+	router.multiplexer.HandleFunc("/url_data/", router.uiManager.HandleURLDataTracking).Methods("GET")
 }
 
 func (router *Router) handleUserOps() {
