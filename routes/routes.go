@@ -73,7 +73,7 @@ func (router *Router) createShortURL(res http.ResponseWriter, req *http.Request)
 
 	resp := make(map[string]interface{})
 	if resp["valid_url"] = router.urlValidator.IsURLValid(url); resp["valid_url"].(bool) {
-		shortURL := router.urlManager.CreateAndUpdate(url, user)
+		shortURL := router.urlManager.CreateShortURL(url, user)
 
 		resp["url"] = url
 		resp["short"] = "shorts.ninja/" + shortURL

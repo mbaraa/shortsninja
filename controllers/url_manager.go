@@ -3,7 +3,10 @@ package controllers
 import (
 	"github.com/baraa-almasri/shortsninja/models"
 	"github.com/baraa-almasri/useless"
+	"github.com/google/uuid"
+	"math/rand"
 	"net/http"
+	"strings"
 )
 
 // URLManager holds URL operations handlers
@@ -27,25 +30,29 @@ func NewURLManager(urlValidator *URLValidator, requestDataManager *RequestDataMa
 	}
 }
 
-// CreateAndUpdate creates a new short url that doesn't exist in the db,
-// adds the new short URL to the database and returns the assigned short URL
-// TODO
-// split into createUUID() and addURLToDB()
-func (um *URLManager) CreateAndUpdate(url string, user *models.User) string {
-	// storing the generated short url so it can be returned :)
-	var newURL *models.URL
-	// loop until the generated short url doesn't exist in the db
-	for {
-		newURL = &models.URL{
-			Short:     um.randomizer.GetRandomAlphanumString(5),
-			FullURL:   url,
-			UserEmail: user.Email,
-		}
-		if um.db.AddURL(newURL) == nil {
-			break
-		}
+// CreateShortURL adds a new short URL to the database
+func (um *URLManager) CreateShortURL(url string, user *models.User) string {
+	newURL := &models.URL{
+		Short:     um.createUniqueShortURL(5),
+		FullURL:   url,
+		UserEmail: user.Email,
+	}
+	err := um.db.AddURL(newURL)
+	if err != nil {
+		um.CreateShortURL(url, user)
 	}
 	return newURL.Short
+}
+
+// createUniqueShortURL
+func (um *URLManager) createUniqueShortURL(length int) string {
+	uuidGen := uuid.New()
+	short := strings.ReplaceAll(uuidGen.String(), "-", "")
+	rand.Seed(int64(uuidGen.ClockSequence()))
+
+	lastIndex := rand.Intn(len(short)-length+1) + length
+
+	return short[lastIndex-length : lastIndex]
 }
 
 // GetFullURL returns the full URL for the given short URL
