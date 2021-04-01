@@ -37,18 +37,32 @@
             window.alert("enter a valid url!");
         }
     }
+
+    function copyToClipboard(str) {
+        let textArea = document.getElementById("dummyText");
+        textArea.hidden = false;
+        textArea.value = str;
+        textArea.select();
+        textArea.setSelectionRange(0, 99999);
+        document.execCommand("copy");
+
+        textArea.hidden = true;
+    }
 </script>
+
+<input id="dummyText" type="text" hidden>
 
 <fieldset style="border-color: #4285F4; box-shadow: 0 0 10px 5px #4285F4">
     <br/>
     <form onsubmit="shorten(url.value); return false;">
         <input style="height: 40px; width: 60%; font-size: 20px"
                type="text" name="url" placeholder="Type/Paste a URL to be shortened!">
-        <!--            <input type="text" name="user" value="no_user" hidden>-->
         <input style="height: 45px; width: min-content; font-size: 25px"
                type="submit" value="Shorten">
         <br/><br/>
         <a style="font-size: 17px" id="short" target="_blank" href="/">Your short URL will appear here :)</a>
+        <input style="height: 25px; font-size: 17px" type="button" onclick="copyToClipboard(short.href)"
+               value="Copy URL">
         <br/><br/>
     </form>
 </fieldset>
