@@ -100,18 +100,20 @@ func (s *SQLite) RemoveURL(url *URL) error {
 }
 
 // GetURL returns the full URL of a short URL
-func (s *SQLite) GetURL(shortURL string) (string, error) {
-	rows, err := s.manager.Query(`SELECT full_url FROM URL WHERE short = ?;`, shortURL)
+func (s *SQLite) GetURL(shortURL string) (*URL, error) {
+	rows, err := s.manager.Query(`SELECT short, full_url, creation_date, user_email FROM URL WHERE short = ?;`, shortURL)
 	defer rows.Close()
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	var url string
+	url := new(URL)
 	rows.Next()
-	err = rows.Scan(&url)
+	var timeStamp time.Time
+	err = rows.Scan(&url.Short, &url.FullURL, &timeStamp, &url.UserEmail)
+	url.Created = (&TimeDurationFormatter{}).GetDurationSince(timeStamp.Unix())
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	// the happily ever after

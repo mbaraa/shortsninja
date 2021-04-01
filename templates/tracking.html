@@ -11,6 +11,30 @@
 <br/><br/>
 
 {{ if .Email }}
+
+<script>
+    function removeURL(url) {
+        const xhttp = new XMLHttpRequest();
+        xhttp.open("DELETE", "/remove/?short=" + url, false);
+        xhttp.send();
+        // refresh page after deleting
+        window.location.reload();
+    }
+
+    function copyToClipboard(str) {
+        let textArea = document.getElementById("dummyText");
+        textArea.hidden = false;
+        textArea.value = str;
+        textArea.select();
+        textArea.setSelectionRange(0, 99999);
+        document.execCommand("copy");
+
+        textArea.hidden = true;
+    }
+</script>
+
+<input id="dummyText" type="text" hidden>
+
 <table border="1" style="border-collapse: collapse; border-color: #4285F4;
        width: 100%; height: 10%; box-shadow: 0 0 10px 5px #4285F4;
        font-family: Sans; font-size: 20px;">
@@ -18,8 +42,8 @@
         <th colspan="1">Short URL</th>
         <th colspan="3">Full URL</th>
         <th colspan="2">Created</th>
-        <!--    <th colspan="1">Visits</th>-->
-        <!--    <th colspan="1">Ops</th>-->
+        <th colspan="1">Visits</th>
+        <th colspan="1">Operations</th>
     </tr>
     {{ range .URLs }}
 
@@ -32,8 +56,16 @@
         <td colspan="3">&nbsp;
             <a style=" color: #ff00ff; text-decoration: underline" href="{{ .FullURL }}">{{ .FullURL }}</a></td>
         <td colspan="2" style=" color: #4285F4;">&nbsp; {{ .Created }}</td>
-        <!--        <td colspan="1" style=" color: #4285F4;">&nbsp; {{ .Visits }}</td>-->
-        <!--        <td colspan="1" style=" color: #4285F4;">&nbsp; foo</td>-->
+        <td colspan="1" style=" color: #4285F4;">&nbsp; {{ .Visits }}</td>
+        <th colspan="1" style=" color: #4285F4;">
+            <img style="cursor: pointer" onclick="removeURL('{{ .Short }}')"
+                 src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABmJLR0QA/wD/AP+gvaeTAAACg0lEQVRIie2WPWuUURCFn3M3xjWsQYKFBEE3KFiKP8HSSuwVi1ikUFCJ+Q2mED8QLERFFCwsRMSPxsLSv6CYBUFCsJAYkyXZnWPx3v3KvoumsXKK3Tsz586cOffuu68YYY2ZxVO0dYsUB4pIAiJ/95tXAl+eWVp4WVZnbFQDzB0nzwhl1xRrb0fWEroL7LSBpyUBrIMeKbw+SF5V4Dy4ZnxwVJnRDYrigB4cXpq/WAb5Ur++KbgyPFRJg09Hbk9Wm62u36aV90V8PXhjqmxzm1YUHKAf06yOtY5+vrSaU9A4tHjCiafYk5KwjWC6mMJroNVSeqFJkmsYEN96Ca8FnJ1ZWvhYMK5wXMGxTlr5wzYSNXDNLlRzUQwZLHfxNtPdOFCRjgMfE8BWqj43ugx6X+wQoO/APaNlEJLC6K3gtVBYQtIK1j2kFSSEsPiglK5uVqrPIF/qo58vrdYb8zcRb3rj+1m9sTAnuF/QZhW351KbC8APCtaP6o1rc4Gf9KbXu8Nf5m90zmD7ryZLaEhqZm8jyxWVdtoc21PZBFqyIZExamLjkutU3qB7Rft45dhPCo09gAk6Ev1dg7KJsu2FHZUZytjGHhzV+epCbwJsiMiIGCAxskEQSD05Oiboxvb2+ynlImloT2mDlN0RZLoTAAMHGsTQ1B0behb1gD1GXUkGfMDBn+y/RKOZdEn32T+VyHgcwGJ3J721y2OtjfY4kLJE1Zwb37lE5lyjvjiBOZ0j+yqRHkaKwNqfwbONQ4tTts+UVt/eIIjlpNR5ddgHzELfaYiTKOWlAKYQs33PoEAsj2ywMdF8Ufs18djiNKj8/zoiax/5LSavTQvp1VaqPu+H/wZXuyZe7v9ceQAAAABJRU5ErkJggg==">
+            <img style="cursor: pointer" onclick="copyToClipboard('http://shorts.ninja/{{ .Short }}')"
+                 src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABmJLR0QA/wD/AP+gvaeTAAAEFklEQVRIiZ2VX4iUZRTGf8/5vp3ZHSUiai8Wcmd2tWCFsCiJrpbodukfdFcJXolQSOoaEY5IqGMXEogXYQmSdVFZgneJG1RoEJhIhP/2W1mWkGURdWfH3fnO6WJ211Un0d6rF95z3uc8v/ec7xPAaLm2RhbDhNYGdAIGuIiboG8j6jsrWbXB/1jKemvPYRwHuoFJIppIAA6kQDehH4J0fSXbdO1hBSyM7UB3BDsKHba6tGzm6cKt+qqI+qpkLl1NxFnwN8TcVxdWfvbIwwqkwNqIuNpMu/ZVzr93/a7zRlapjQNrgMGOfGY78MFDCQg6Qddni1PtGYsmwYij9wtJTGX9e1829+V5YAAyzc5ZnF11cXi8XbqBUgQDT+DtAgLOJ3Ppm8AzzVynI48Tjn4UOgo6SnC8o6k/Rst7XmvrAJyI/7ZY76p/3BWdLwp9DtY0yw/loSmTXK0SDPEWwdej5dqGSrb10F0CBgQjwMX+XSuTPFl/h8UbdtgTXy8oRMSG8ui2Oy4AyCo1R2wW7M96a1Ye2/rFokAQ3upKUKRlKba1CguQcMtPi+gBu5km+S9tMQY3aN1RCuNA1re3Ub685QiAtRAFg0BXqjO5GJIYkmlIYgh0CoeItk/UKkw0iSAIFFEI94Njldo7AKkwAhgB+pt5OXH7cOmTuOXDSdh8gXlbAUdXJK4L0hAmKATan/XWJlNgEdEc9miieGkpInM9ju7fCJXR6SPj/cVTPtdR8CRSua/E+BKLT9IAmE/uakz/Vu8qriouSS523vqnXu/cCOBz+KW+3SuSsF8jWJzqbMGcOQq92luZOTY2VroWQTkVEGopNIrLn0/dv1sKoj5TehccyYAcN3mSMyXRbGvH8tnbAGQpgOYJQ96IYFwLzCKIsLo0nwDMFmeuJvVlb5tHuvTeZqrx/kvTk6LqJ5+sphUByNIAX0DUNzr8O/Ds3UVlld0fMT/opelijxQ/h+JRAElEBEmuTaK6D2AQGANwJxWaQtHdd3n5U8BfbW23vAM5xULHzVvN/BsiSsjmawtCcW+uGWkoDirYFUl+NKvUDkfo5u0Ix9yPBbBAbdoLs6nP/AlJJ4udlaBgYLS8d8At/36ExkRl/iTF6/uCUkVoXRA7F1tKAoSbZUa4hyMgbU4/JiW7IvwORAt7SM4NwsTYgkAlqzZisLoxy0oHQGtkUSIwhSzkLveznphLYq4jt9CyyTRvDBvWCeABC2PoAcXE/75NIFw8wMrKe44HGjS3F3qvbL7PO7XWRE+1NFssXQAK9iACYTqHKEUSGyd6qqX7xZ4crKazHV3raP3jzzyQg9HyrjKyE0JlYAKiDmrz9QsDFYCeCOqg1x9IAGBsxacDbrET8lekxMBbo2HGPXvsTC529F/e8tO/+wXlevsyptoAAAAASUVORK5CYII=">
+            <img style="cursor: pointer" onclick="window.alert('lol it\'s not ready yet!')"
+                 src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABmJLR0QA/wD/AP+gvaeTAAACM0lEQVRIiaWWQW4TQRBF32+PPCTKGWBipFmQS3AKDoEiC4QICwQyGyMnIKJchQXXYJMNErF9BzCy5XSx6HFPj2N7HCip1dWjqv5dv363RgCT3ug5xggctXnC2ldrXRbjs3cA0+OLZ0u5749vXv2gxRyAebqgI7Bk6MiqGXRkortKusXKji2/Th9+7O0FEM1S31Di301SaVmnFcTFycAwzMJAqqNSn0CamWHennjnvv3sfS5bADwIJMWxXtB6kiQIsTvpihWEk5NsnFC0BuVXn1afTaV3m+mKPRBCgaKr2eEs/334JwfebqrDRVDDItKKrmF5NxYwARLO4U+uB4uT68HCzC9DHarVGuMrilDtS2XHmpXEHmxjXRBUlOjN34lKgFHpM0WQLOJYZL4/KUZ9S1Joiojj8WwIDHfgRMviNgp9AFwoPW4f/OTYYrCriIZtp6iqaBNF9zEBjIuLF2BfwHCOy0c3b14CTIvzMy9GjQwzJIXLCFt9k173xmefsliBglq8bzZ6jf54q5Xc7k2+vPeQNpnqoglnTwcZwGQSiEn7ESsIb8tW35xzCcCKcgOjP5kc9JHizhufDNvDrwFqilrtfymS8GYstQMrSrdKNizbmyKJq2IcVLSPTYvz9wYfGuiJtaqozTz3pygbF4MH+QI37+LzRVDSyk9nABM591GRGadwcDrPw0nmeX3aeR4CF7niTXcxd0+KWu1fVCTHAtOvxp/KtrfHe3BVkGerL3WWAH8Be84xZx6KPLQAAAAASUVORK5CYII=">
+
+        </th>
     </tr>
 
     {{ end }}

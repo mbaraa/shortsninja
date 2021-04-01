@@ -31,10 +31,10 @@ func NewRouter(dbManager models.Database, templates *template.Template, config *
 
 	requestDataManager := controllers.NewRequestDataManager(config, dbManager)
 	userManager := controllers.NewUserManager(dbManager, requestDataManager)
-	uiManager := controllers.NewUIManager(userManager, templates, config)
 	urlManager := controllers.NewURLManager(
 		controllers.NewURLValidator(), requestDataManager, userManager, randomizer, dbManager,
 	)
+	uiManager := controllers.NewUIManager(userManager, urlManager, templates, config)
 	urlValidator := controllers.NewURLValidator()
 	googleLogin := controllers.NewGoogleLogin(randomizer, config, requestDataManager, dbManager)
 
@@ -95,6 +95,12 @@ func (router *Router) getFullURL(res http.ResponseWriter, req *http.Request) {
 	http.Redirect(res, req, url, http.StatusFound)
 }
 
+// removeURL removes the given url from the database
+// DELETE /remove/?short=shortHandler
+func (router *Router) removeURL(res http.ResponseWriter, req *http.Request) {
+	router.urlManager.RemoveURL(req.URL.Query()["short"][0], req)
+}
+
 // rickRoll redirects to Rick Astley's - Never Gonna Give You Up YT Video, perfect RickRolling :)
 // GET /no_url/
 func (router *Router) rickRoll(res http.ResponseWriter, req *http.Request) {
@@ -105,13 +111,14 @@ func (router *Router) handleURLOps() {
 	router.multiplexer.HandleFunc("/shorten/", router.createShortURL).Methods("GET")
 	router.multiplexer.HandleFunc("/no_url/", router.rickRoll).Methods("GET")
 	router.multiplexer.HandleFunc("/{[A-Z;0-9;a-z]{4,5}}", router.getFullURL).Methods("GET")
+	router.multiplexer.HandleFunc("/remove/", router.removeURL).Methods("DELETE")
 }
 
 func (router *Router) handleUI() {
 	router.multiplexer.HandleFunc("/", router.uiManager.GetPageByName("shorten")).Methods("GET")
 	router.multiplexer.HandleFunc("/about/", router.uiManager.GetPageByName("about")).Methods("GET")
 	router.multiplexer.HandleFunc("/tracking/", router.uiManager.HandleTracking).Methods("GET")
-	router.multiplexer.HandleFunc("/user_info/", router.uiManager.GetPageByName("login")).Methods("GET")
+	router.multiplexer.HandleFunc("/user_info/", router.uiManager.HandleUserInfo).Methods("GET")
 }
 
 func (router *Router) handleUserOps() {

@@ -4,7 +4,7 @@ package models
 type Database interface {
 	AddURL(url *URL) error
 	RemoveURL(url *URL) error
-	GetURL(shortURL string) (string, error)
+	GetURL(shortURL string) (*URL, error)
 	GetURLs(user *User) ([]*URL, error)
 
 	AddUser(user *User) error

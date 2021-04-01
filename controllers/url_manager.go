@@ -13,7 +13,7 @@ import (
 type URLManager struct {
 	urlValidator *URLValidator
 	reqData      *RequestDataManager
-	userMan      *UserManager
+	userManager  *UserManager
 	randomizer   *useless.RandASCII
 	db           models.Database
 }
@@ -24,7 +24,7 @@ func NewURLManager(urlValidator *URLValidator, requestDataManager *RequestDataMa
 	return &URLManager{
 		urlValidator: urlValidator,
 		reqData:      requestDataManager,
-		userMan:      userManager,
+		userManager:  userManager,
 		randomizer:   randomStringGenerator,
 		db:           db,
 	}
@@ -63,7 +63,13 @@ func (um *URLManager) GetFullURL(shortURL string) string {
 	}
 
 	// happily ever after
-	return url
+	return url.FullURL
+}
+
+// GetURLData returns a slice of URLData of the given URL
+func (um *URLManager) GetURLData(url *models.URL) []*models.URLData {
+	urlData, _ := um.db.GetURLData(url)
+	return urlData
 }
 
 // TrackURLData stores short URL data if the short URL is assigned to a specific user
@@ -71,8 +77,24 @@ func (um *URLManager) TrackURLData(req *http.Request) {
 	data := um.reqData.GetURLDataFromRequestData(req)
 	data.ShortURL = req.URL.Path[1:]
 
-	user := um.userMan.GetUserFromToken(req)
-	if user.Email != "" {
+	url, err := um.db.GetURL(data.ShortURL)
+	if err != nil {
+		return
+	}
+
+	user, err := um.db.GetUser(&models.User{Email: url.UserEmail})
+	if err == nil && user.Email != "" {
 		_ = um.db.AddURLData(data)
 	}
+}
+
+// RemoveURL removes a corresponding short URL from the database
+func (um *URLManager) RemoveURL(shortURL string, request *http.Request) {
+	user := um.userManager.GetUserFromToken(request)
+	url, err := um.db.GetURL(shortURL)
+	if err != nil || user.Email != url.UserEmail {
+		return
+	}
+
+	_ = um.db.RemoveURL(&models.URL{Short: shortURL})
 }
