@@ -3,6 +3,7 @@ package models
 import (
 	"database/sql"
 	_ "github.com/mattn/go-sqlite3"
+	"time"
 )
 
 // SQLite represents a sqlite database for the program
@@ -121,21 +122,25 @@ func (s *SQLite) GetURL(shortURL string) (string, error) {
 func (s *SQLite) GetURLs(user *User) ([]*URL, error) {
 	rows, err := s.manager.Query(
 		`SELECT short, full_url, creation_date FROM URL WHERE user_email=?;`, user.Email)
+	defer rows.Close()
 	if err != nil {
 		return nil, err
 	}
 
 	var urls []*URL
 	var url *URL
+	var timeStamp time.Time
 
 	for rows.Next() {
 		url = new(URL)
 
-		err = rows.Scan(&url.Short, &url.FullURL, &url.CreationDate)
+		err = rows.Scan(&url.Short, &url.FullURL, &timeStamp)
 		if err != nil {
 			return nil, err
 		}
 
+		url.Created = (&TimeDurationFormatter{}).GetDurationSince(timeStamp.Unix())
+		url.Visits = 0
 		urls = append(urls, url)
 	}
 
@@ -169,6 +174,7 @@ func (s *SQLite) RemoveUser(user *User) error {
 // GetUser returns an existing user from the database
 func (s *SQLite) GetUser(user *User) (*User, error) {
 	rows, err := s.manager.Query(`SELECT * FROM USER WHERE email=?;`, user.Email)
+	defer rows.Close()
 	if err != nil {
 		return nil, err
 	}
@@ -213,6 +219,7 @@ func (s *SQLite) RemoveURLData(url *URL) error {
 // GetURLData returns a slice of URLData of the given URL and an occurred error
 func (s *SQLite) GetURLData(url *URL) ([]*URLData, error) {
 	rows, err := s.manager.Query(`SELECT * FROM URL_DATA WHERE short=?`, url.Short)
+	defer rows.Close()
 	if err != nil {
 		return nil, err
 	}
@@ -260,6 +267,7 @@ func (s *SQLite) RemoveSession(sess *Session) error {
 // GetSession returns a specific session from the database
 func (s *SQLite) GetSession(token string) (*Session, error) {
 	rows, err := s.manager.Query(`SELECT * FROM SESSION WHERE token=?`, token)
+	defer rows.Close()
 	if err != nil {
 		return nil, err
 	}

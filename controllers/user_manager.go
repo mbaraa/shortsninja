@@ -3,18 +3,19 @@ package controllers
 import (
 	"github.com/baraa-almasri/shortsninja/models"
 	"net/http"
+	"strings"
 )
 
 // UserManager holds different user operations
 type UserManager struct {
-	dbMan   models.Database
+	db      models.Database
 	reqData *RequestDataManager
 }
 
 // NewUserManager returns a new UserManager instance
 func NewUserManager(dbManager models.Database, requestDataManager *RequestDataManager) *UserManager {
 	return &UserManager{
-		dbMan:   dbManager,
+		db:      dbManager,
 		reqData: requestDataManager,
 	}
 }
@@ -34,18 +35,18 @@ func (um *UserManager) GetUserFromToken(req *http.Request) *models.User {
 // getUserFromDB returns a user using the given session token, if no user exists
 // or the token doesn't match its previous IP it returns a dummy user with shorts ninja icon
 func (um *UserManager) getUserFromDB(token, ip string) *models.User {
-	realSession, _ := um.dbMan.GetSession(token)
+	realSession, _ := um.db.GetSession(token)
 	if realSession == nil {
 		return um.getDummyUser()
 	}
-	user, _ := um.dbMan.GetUser(&models.User{Email: realSession.UserEmail})
+	user, _ := um.db.GetUser(&models.User{Email: realSession.UserEmail})
 	if user == nil {
 		return um.getDummyUser()
 	}
 
 	// remove session when ip changes!
 	if realSession.IP != ip {
-		_ = um.dbMan.RemoveSession(realSession)
+		_ = um.db.RemoveSession(realSession)
 		return um.getDummyUser()
 	}
 
@@ -72,10 +73,21 @@ func (um *UserManager) getTokenFromQuery(req *http.Request) string {
 
 // getTokenFromCookie returns token from the the cookie
 func (um *UserManager) getTokenFromCookie(req *http.Request) string {
-	if token := req.Header.Get("Cookie"); token != "" {
-		return token[len("token="):]
+	if cookie := req.Header.Get("Cookie"); cookie != "" {
+		tokenWordIndex := strings.Index(cookie, "token=")
+		if tokenWordIndex == -1 {
+			return ""
+		}
+		tokenWordIndex += len("token=")
+		return cookie[tokenWordIndex : tokenWordIndex+32] // 32 is the length of the token :)
 	}
 	return ""
+}
+
+// GetURLsOfUser returns a slice with all URLs of a certain user from the database
+func (um *UserManager) GetURLsOfUser(user *models.User) []*models.URL {
+	urls, _ := um.db.GetURLs(user)
+	return urls
 }
 
 // getDummyUser returns an unsigned-in user!

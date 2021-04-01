@@ -110,7 +110,7 @@ func (router *Router) handleURLOps() {
 func (router *Router) handleUI() {
 	router.multiplexer.HandleFunc("/", router.uiManager.GetPageByName("shorten")).Methods("GET")
 	router.multiplexer.HandleFunc("/about/", router.uiManager.GetPageByName("about")).Methods("GET")
-	router.multiplexer.HandleFunc("/tracking/", router.uiManager.GetPageByName("tracking")).Methods("GET")
+	router.multiplexer.HandleFunc("/tracking/", router.uiManager.HandleTracking).Methods("GET")
 	router.multiplexer.HandleFunc("/user_info/", router.uiManager.GetPageByName("login")).Methods("GET")
 }
 

@@ -7,8 +7,51 @@
 </head>
 <body>
 
-    {{ template "navbar" . }}
-    <h1 style="font-family: Sans">Woah! it's not ready yet!</h1>
+{{ template "navbar" . }}
+<br/><br/>
+
+{{ if .Email }}
+<table border="1" style="border-collapse: collapse; border-color: #4285F4;
+       width: 100%; height: 10%; box-shadow: 0 0 10px 5px #4285F4;
+       font-family: Sans; font-size: 20px;">
+    <tr>
+        <th colspan="1">Short URL</th>
+        <th colspan="3">Full URL</th>
+        <th colspan="2">Created</th>
+        <!--    <th colspan="1">Visits</th>-->
+        <!--    <th colspan="1">Ops</th>-->
+    </tr>
+    {{ range .URLs }}
+
+    <tr>
+        <td colspan="1">&nbsp;
+            <a style=" color: #ff00ff; text-decoration: underline" href="http://shorts.ninja/{{ .Short }}">
+                shorts.ninja/{{ .Short }}
+            </a>
+        </td>
+        <td colspan="3">&nbsp;
+            <a style=" color: #ff00ff; text-decoration: underline" href="{{ .FullURL }}">{{ .FullURL }}</a></td>
+        <td colspan="2" style=" color: #4285F4;">&nbsp; {{ .Created }}</td>
+        <!--        <td colspan="1" style=" color: #4285F4;">&nbsp; {{ .Visits }}</td>-->
+        <!--        <td colspan="1" style=" color: #4285F4;">&nbsp; foo</td>-->
+    </tr>
+
+    {{ end }}
+</table>
+
+{{ else }}
+
+<fieldset style="border-color: #4285F4; box-shadow: 0 0 10px 5px #4285F4">
+    <h2 style="font-family: Sans; color: #4285F4;">Hmm... You need to be logged in to track URL data!</h2>
+    <form action="/login/">
+        <input type="submit" style="height: 45px; width: min-content; font-size: 25px; font-family: Sans"
+               value="Login With Google!">
+    </form>
+    <br/>
+</fieldset>
+
+{{ end }}
+<br/>
 
 </body>
 </html>

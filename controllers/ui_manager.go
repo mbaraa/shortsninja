@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"github.com/baraa-almasri/shortsninja/config"
+	"github.com/baraa-almasri/shortsninja/models"
 	"html/template"
 	"net/http"
 )
@@ -29,36 +30,23 @@ func (ui *UIManager) GetPageByName(pageName string) func(res http.ResponseWriter
 	}
 }
 
-// Deprecated
-// use GetPageByName instead, since it's more generic and really awesome :)
-//
-// HandleHome renders the shortening page of a specific or an anonymous user
-func (ui *UIManager) HandleHome(w http.ResponseWriter, r *http.Request) {
-	ui.renderPageFromSessionToken("shorten", w, r)
-}
-
-// Deprecated
-// use GetPageByName instead, since it's more generic and really awesome :)
-//
 // HandleTracking renders the URLs tracking page of a specific user
-func (ui *UIManager) HandleTracking(w http.ResponseWriter, r *http.Request) {
-	ui.renderPageFromSessionToken("tracking", w, r)
-}
+func (ui *UIManager) HandleTracking(res http.ResponseWriter, req *http.Request) {
+	user := ui.userMan.GetUserFromToken(req)
+	ui.userMan.SetToken(res, req)
 
-// Deprecated
-// use GetPageByName instead, since it's more generic and really awesome :)
-//
-// HandleAbout renders the about page
-func (ui *UIManager) HandleAbout(w http.ResponseWriter, r *http.Request) {
-	ui.renderPageFromSessionToken("about", w, r)
-}
+	urls := make([]*models.URL, 1)
+	if user.Email != "" {
+		urls = ui.userMan.GetURLsOfUser(user)
+	}
 
-// Deprecated
-// use GetPageByName instead, since it's more generic and really awesome :)
-//
-// HandleUserInfo renders the user info page
-func (ui *UIManager) HandleUserInfo(w http.ResponseWriter, r *http.Request) {
-	ui.renderPageFromSessionToken("login", w, r)
+	// no error to be handled since it's being called by the router only :)
+	_ = ui.templates.ExecuteTemplate(res, "tracking", map[string]interface{}{
+		"Avatar":  user.Avatar,
+		"Email":   user.Email,
+		"FontB64": ui.conf.Font,
+		"URLs":    urls,
+	})
 }
 
 // renderPageFromSessionToken generates the required web page with the given user's data
