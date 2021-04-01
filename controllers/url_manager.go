@@ -92,9 +92,9 @@ func (um *URLManager) TrackURLData(req *http.Request) {
 func (um *URLManager) RemoveURL(shortURL string, request *http.Request) {
 	user := um.userManager.GetUserFromToken(request)
 	url, err := um.db.GetURL(shortURL)
-	if err != nil || user.Email != url.UserEmail {
-		return
-	}
 
-	_ = um.db.RemoveURL(&models.URL{Short: shortURL})
+	if err == nil && user.Email == url.UserEmail {
+		_ = um.db.RemoveURLData(url)
+		_ = um.db.RemoveURL(url)
+	}
 }

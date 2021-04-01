@@ -209,7 +209,7 @@ func (s *SQLite) AddURLData(urlData *URLData) error {
 // RemoveURLData removes all the data of a given URL, and returns an occurred error
 func (s *SQLite) RemoveURLData(url *URL) error {
 	_, err := s.manager.Exec(
-		`DELETE FROM URL_DATA WHERE short=?)`, url.Short)
+		`DELETE FROM URL_DATA WHERE short=?`, url.Short)
 	if err != nil {
 		return err
 	}
