@@ -10,7 +10,6 @@ import (
 	"net/http"
 )
 
-// still testing :)
 func main() {
 	templates := template.Must(template.ParseGlob("./templates/*.html"))
 	dbManager := models.NewSQLiteDB()
@@ -18,6 +17,25 @@ func main() {
 
 	mux := routes.NewRouter(dbManager, templates, conf)
 
-	corsHandler := cors.Default().Handler(mux.GetRoutes())
+	//go runMainHTTPSServer(mux)
+	//runHTTPServer()
+
+	runLocally(mux)
+}
+
+func runLocally(router *routes.Router) {
+	corsHandler := cors.Default().Handler(router.GetRoutes())
 	log.Fatal(http.ListenAndServe(":8080", corsHandler))
+}
+
+func runMainHTTPSServer(router *routes.Router) {
+	corsHandler := cors.Default().Handler(router.GetRoutes())
+	log.Fatal(http.ListenAndServeTLS("", "./shorts.ninja.crt", "./shorts.ninja.key", corsHandler))
+}
+
+func runHTTPServer() {
+	http.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
+		http.Redirect(w, req, "https://shorts.ninja/"+req.URL.Path[1:], http.StatusFound)
+	})
+	log.Fatal(http.ListenAndServe(":80", nil))
 }

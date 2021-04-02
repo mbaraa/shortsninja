@@ -50,33 +50,30 @@ func (g *GoogleLogin) LoginWithGoogle(w http.ResponseWriter, r *http.Request) {
 // HandleCallback is called when authenticating with google
 func (g *GoogleLogin) HandleCallback(w http.ResponseWriter, r *http.Request) {
 	if r.FormValue("state") != g.state {
-		w.WriteHeader(http.StatusNotFound)
-		http.Redirect(w, r, "/", http.StatusFound)
+		http.Redirect(w, r, "/user_info/", http.StatusFound)
 		return
 	}
 
 	token, err := g.googleOauthConfig.Exchange(context.Background(), r.FormValue("code"))
 	if err != nil {
-		w.Write([]byte("couldn't get token!"))
 		http.Redirect(w, r, "/user_info/", http.StatusFound)
 		return
 	}
 
 	dataResponse, err := http.Get("https://www.googleapis.com/oauth2/v2/userinfo?access_token=" + token.AccessToken)
-	defer dataResponse.Body.Close()
 	if err != nil {
 		http.Redirect(w, r, "/user_info/", http.StatusFound)
 		return
 	}
+	defer dataResponse.Body.Close()
 
 	data := make(map[string]interface{})
 	json.NewDecoder(dataResponse.Body).Decode(&data)
 
-	token1 := g.randomizer.GetRandomAlphanumString(32)
-	callerIP := g.reqData.GetIP(r)
+	callerData := g.reqData.GetURLDataFromRequestData(r)
 	_ = g.dbMan.AddSession(&models.Session{
-		Token:     token1,
-		IP:        callerIP,
+		IP:        callerData.IP,
+		UserAgent: callerData.UserAgent,
 		UserEmail: data["email"].(string),
 	})
 
@@ -85,6 +82,6 @@ func (g *GoogleLogin) HandleCallback(w http.ResponseWriter, r *http.Request) {
 		Avatar: data["picture"].(string),
 	})
 
-	// go back to the home page with the user token
-	http.Redirect(w, r, "/?token="+token1, http.StatusFound)
+	// go back to the home page
+	http.Redirect(w, r, "/", http.StatusFound)
 }

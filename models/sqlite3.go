@@ -3,6 +3,7 @@ package models
 import (
 	"database/sql"
 	_ "github.com/mattn/go-sqlite3"
+	"strings"
 	"time"
 )
 
@@ -35,7 +36,7 @@ func mustInitSQLiteDB(db *sql.DB) {
     USER (
     	email VARCHAR(255) PRIMARY KEY , 
     	avatar_link VARCHAR(2000),
-    	creation_date TIMESTAMP
+    	created_at TIMESTAMP
 	);`)
 	if err != nil {
 		panic(err)
@@ -45,7 +46,7 @@ func mustInitSQLiteDB(db *sql.DB) {
     URL (
     	short VARCHAR(5) PRIMARY KEY, 
     	full_url VARCHAR(2000),
-    	creation_date TIMESTAMP,
+    	created_at TIMESTAMP,
     	user_email VARCHAR(255)
 	);`)
 	if err != nil {
@@ -54,9 +55,9 @@ func mustInitSQLiteDB(db *sql.DB) {
 
 	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS 
 	SESSION (
-		token VARCHAR(32),
-		IP VARCHAR(45),
-		user_email VARCHAR(255)
+		ip VARCHAR(45),
+		user_email VARCHAR(255),
+		user_agent VARCHAR(4000)
 	);`)
 	if err != nil {
 		panic(err)
@@ -66,9 +67,9 @@ func mustInitSQLiteDB(db *sql.DB) {
 	URL_DATA (
 	    short VARCHAR(5),
 	    IP VARCHAR(45),
-	    user_agent VARCHAR(255),
+	    user_agent VARCHAR(4000),
 	    visit_location VARCHAR(50),
-	    visit_time TIMESTAMP
+	    visited_at TIMESTAMP
 	);`)
 	if err != nil {
 		panic(err)
@@ -78,7 +79,7 @@ func mustInitSQLiteDB(db *sql.DB) {
 // AddURL add a new url entry to the database
 func (s *SQLite) AddURL(url *URL) error {
 	_, err := s.manager.Exec(
-		`INSERT INTO URL (short, full_url, creation_date, user_email) VALUES (?, ? , CURRENT_TIMESTAMP, ?);`,
+		`INSERT INTO URL (short, full_url, created_at, user_email) VALUES (?, ? , CURRENT_TIMESTAMP, ?);`,
 		url.Short, url.FullURL, url.UserEmail)
 	if err != nil {
 		return err
@@ -101,17 +102,17 @@ func (s *SQLite) RemoveURL(url *URL) error {
 
 // GetURL returns the full URL of a short URL
 func (s *SQLite) GetURL(shortURL string) (*URL, error) {
-	rows, err := s.manager.Query(`SELECT short, full_url, creation_date, user_email FROM URL WHERE short = ?;`, shortURL)
-	defer rows.Close()
+	rows, err := s.manager.Query(`SELECT short, full_url, created_at, user_email FROM URL WHERE short = ?;`, shortURL)
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 
 	url := new(URL)
 	rows.Next()
 	var timeStamp time.Time
 	err = rows.Scan(&url.Short, &url.FullURL, &timeStamp, &url.UserEmail)
-	url.Created = (&TimeDurationFormatter{}).GetDurationSince(timeStamp.Unix())
+	url.Created = (new(TimeDurationFormatter)).GetDurationSince(timeStamp.Unix())
 	if err != nil {
 		return nil, err
 	}
@@ -123,11 +124,11 @@ func (s *SQLite) GetURL(shortURL string) (*URL, error) {
 // GetURLs returns a map that has short URLs of the given user
 func (s *SQLite) GetURLs(user *User) ([]*URL, error) {
 	rows, err := s.manager.Query(
-		`SELECT short, full_url, creation_date FROM URL WHERE user_email=?;`, user.Email)
-	defer rows.Close()
+		`SELECT short, full_url, created_at FROM URL WHERE user_email=?;`, user.Email)
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 
 	var urls []*URL
 	var url *URL
@@ -141,7 +142,7 @@ func (s *SQLite) GetURLs(user *User) ([]*URL, error) {
 			return nil, err
 		}
 
-		url.Created = (&TimeDurationFormatter{}).GetDurationSince(timeStamp.Unix())
+		url.Created = (new(TimeDurationFormatter)).GetDurationSince(timeStamp.Unix())
 		url.Visits = 0
 		urls = append(urls, url)
 	}
@@ -152,7 +153,7 @@ func (s *SQLite) GetURLs(user *User) ([]*URL, error) {
 // AddUser adds a user to the database
 func (s *SQLite) AddUser(user *User) error {
 	_, err := s.manager.Exec(
-		`INSERT INTO USER (email, avatar_link, creation_date) VALUES (?, ?, CURRENT_TIMESTAMP);`,
+		`INSERT INTO USER (email, avatar_link, created_at) VALUES (?, ?, CURRENT_TIMESTAMP);`,
 		user.Email, user.Avatar)
 	if err != nil {
 		return err
@@ -176,18 +177,20 @@ func (s *SQLite) RemoveUser(user *User) error {
 // GetUser returns an existing user from the database
 func (s *SQLite) GetUser(user *User) (*User, error) {
 	rows, err := s.manager.Query(`SELECT * FROM USER WHERE email=?;`, user.Email)
-	defer rows.Close()
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 
 	u := new(User)
+	timeStamp := new(time.Time)
 
 	rows.Next()
-	err = rows.Scan(&u.Email, &u.Avatar, &u.CreationDate)
+	err = rows.Scan(&u.Email, &u.Avatar, &timeStamp)
 	if err != nil {
 		return nil, err
 	}
+	u.Created = (new(TimeDurationFormatter)).GetDurationSince(timeStamp.Unix())
 
 	// happily ever after
 	return u, nil
@@ -196,7 +199,7 @@ func (s *SQLite) GetUser(user *User) (*User, error) {
 // AddURLData adds data of a certain url, and returns an occurred error
 func (s *SQLite) AddURLData(urlData *URLData) error {
 	_, err := s.manager.Exec(
-		`INSERT INTO URL_DATA (short, IP, user_agent, visit_location, visit_time) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)`,
+		`INSERT INTO URL_DATA (short, IP, user_agent, visit_location, visited_at) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)`,
 		urlData.ShortURL, urlData.IP, urlData.UserAgent, urlData.VisitLocation)
 	if err != nil {
 		return err
@@ -221,21 +224,26 @@ func (s *SQLite) RemoveURLData(url *URL) error {
 // GetURLData returns a slice of URLData of the given URL and an occurred error
 func (s *SQLite) GetURLData(url *URL) ([]*URLData, error) {
 	rows, err := s.manager.Query(`SELECT * FROM URL_DATA WHERE short=?`, url.Short)
-	defer rows.Close()
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 
 	var urlDatas []*URLData
 	var urlData *URLData
+	var timeStamp *time.Time
 
 	for rows.Next() {
 		urlData = new(URLData)
+		timeStamp = new(time.Time)
 
-		err = rows.Scan(&urlData.ShortURL, &urlData.IP, &urlData.UserAgent, &urlData.VisitLocation, &urlData.VisitTime)
+		err = rows.Scan(&urlData.ShortURL, &urlData.IP, &urlData.UserAgent, &urlData.VisitLocation, &timeStamp)
 		if err != nil {
 			return nil, err
 		}
+		urlData.UserAgent = urlData.UserAgent[:strings.Index(urlData.UserAgent, ")")+1]
+		urlData.VisitTime = timeStamp.Format("Mon Jan/2/2006 15:04 MST")
+
 		urlDatas = append(urlDatas, urlData)
 	}
 
@@ -245,8 +253,8 @@ func (s *SQLite) GetURLData(url *URL) ([]*URLData, error) {
 
 // AddSession adds a new session to the database
 func (s *SQLite) AddSession(sess *Session) error {
-	_, err := s.manager.Exec(`INSERT INTO SESSION (token, IP, user_email) VALUES (?, ? ,?)`,
-		sess.Token, sess.IP, sess.UserEmail)
+	_, err := s.manager.Exec(`INSERT INTO SESSION (ip, user_email, user_agent) VALUES (?, ? ,?)`,
+		sess.IP, sess.UserEmail, sess.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -257,7 +265,7 @@ func (s *SQLite) AddSession(sess *Session) error {
 
 // RemoveSession a specific session from the database
 func (s *SQLite) RemoveSession(sess *Session) error {
-	_, err := s.manager.Exec(`DELETE FROM SESSION WHERE token=?`, sess.Token)
+	_, err := s.manager.Exec(`DELETE FROM SESSION WHERE ip=? AND user_agent=?`, sess.IP, sess.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -267,16 +275,16 @@ func (s *SQLite) RemoveSession(sess *Session) error {
 }
 
 // GetSession returns a specific session from the database
-func (s *SQLite) GetSession(token string) (*Session, error) {
-	rows, err := s.manager.Query(`SELECT * FROM SESSION WHERE token=?`, token)
-	defer rows.Close()
+func (s *SQLite) GetSession(sess *Session) (*Session, error) {
+	rows, err := s.manager.Query(`SELECT * FROM SESSION WHERE ip=? AND user_agent=?`, sess.IP, sess.UserAgent)
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 
 	session := new(Session)
 	rows.Next()
-	err = rows.Scan(&session.Token, &session.IP, &session.UserEmail)
+	err = rows.Scan(&session.IP, &session.UserEmail, &session.UserAgent)
 	if err != nil {
 		return nil, err
 	}

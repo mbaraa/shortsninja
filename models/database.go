@@ -17,7 +17,7 @@ type Database interface {
 
 	AddSession(sess *Session) error
 	RemoveSession(sess *Session) error
-	GetSession(token string) (*Session, error)
+	GetSession(sess *Session) (*Session, error)
 }
 
 // TODO

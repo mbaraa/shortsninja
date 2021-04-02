@@ -28,16 +28,15 @@ func NewUIManager(userManager *UserManager, urlManager *URLManager,
 }
 
 // GetPageByName returns a handler function depending on page name
-func (ui *UIManager) GetPageByName(pageName string) func(res http.ResponseWriter, req *http.Request) {
+func (ui *UIManager) GetPageHandlerByName(pageName string) func(res http.ResponseWriter, req *http.Request) {
 	return func(res http.ResponseWriter, req *http.Request) {
-		ui.renderPageFromSessionToken(pageName, res, req)
+		ui.renderPageFromUserIP(pageName, res, req)
 	}
 }
 
 // HandleTracking renders the URLs tracking page of a specific user
 func (ui *UIManager) HandleTracking(res http.ResponseWriter, req *http.Request) {
-	user := ui.userManager.GetUserFromToken(req)
-	ui.userManager.SetToken(res, req)
+	user := ui.userManager.GetUserFromIP(req)
 
 	urls := make([]*models.URL, 1)
 	if user.Email != "" {
@@ -62,10 +61,10 @@ func (ui *UIManager) HandleTracking(res http.ResponseWriter, req *http.Request) 
 
 // HandleURLDataTracking renders the URLs tracking page of a specific user
 func (ui *UIManager) HandleURLDataTracking(res http.ResponseWriter, req *http.Request) {
-	user := ui.userManager.GetUserFromToken(req)
-	ui.userManager.SetToken(res, req)
+	user := ui.userManager.GetUserFromIP(req)
 
 	urlData := make([]*models.URLData, 1)
+
 	if shortURL := req.URL.Query()["short"]; user.Email != "" && shortURL != nil {
 		url := ui.urlManager.GetURL(shortURL[0])
 		if user.Email != url.UserEmail {
@@ -88,8 +87,7 @@ ignoreData:
 // HandleUserInfo renders the user info page
 func (ui *UIManager) HandleUserInfo(res http.ResponseWriter, req *http.Request) {
 
-	user := ui.userManager.GetUserFromToken(req)
-	ui.userManager.SetToken(res, req)
+	user := ui.userManager.GetUserFromIP(req)
 
 	urls := make([]*models.URL, 1)
 	if user.Email != "" {
@@ -101,16 +99,16 @@ func (ui *UIManager) HandleUserInfo(res http.ResponseWriter, req *http.Request) 
 	_ = ui.templates.ExecuteTemplate(res, "login", map[string]interface{}{
 		"Avatar":  user.Avatar,
 		"Email":   user.Email,
+		"Created": user.Created,
 		"FontB64": ui.conf.Font,
 		"NumURLs": numURLs,
 	})
 
 }
 
-// renderPageFromSessionToken generates the required web page with the given user's data
-func (ui *UIManager) renderPageFromSessionToken(pageName string, res http.ResponseWriter, req *http.Request) {
-	user := ui.userManager.GetUserFromToken(req)
-	ui.userManager.SetToken(res, req)
+// renderPageFromUserIP generates the required web page with the given user's data
+func (ui *UIManager) renderPageFromUserIP(pageName string, res http.ResponseWriter, req *http.Request) {
+	user := ui.userManager.GetUserFromIP(req)
 
 	// no error to be handled since it's being called by the router only :)
 	_ = ui.templates.ExecuteTemplate(res, pageName, map[string]string{

@@ -9,22 +9,28 @@ import (
 // TimeDurationFormatter is a wrapping for getting duration since a time stamp
 type TimeDurationFormatter struct{}
 
-// NewTimeDurationFormatter returns a new TimeDurationFormatter instance
-func NewTimeDurationFormatter() *TimeDurationFormatter {
-	return new(TimeDurationFormatter)
-}
-
 // GetDurationSince returns a string with number of days, hours, and minutes since the given timestamp
 func (tf *TimeDurationFormatter) GetDurationSince(timestamp int64) string {
 	duration := time.Since(time.Unix(timestamp, 0))
-	return tf.getDaysSince(duration) + tf.getHoursSince(duration) +
-		tf.getMinutesSince(duration) + " ago"
+
+	days := tf.getDaysSince(duration)
+	hours := tf.getHoursSince(duration)
+	minutes := tf.getMinutesSince(duration)
+	durationStr := ""
+
+	if days != "" {
+		durationStr = days
+	} else {
+		durationStr += hours + minutes
+	}
+
+	return durationStr + " ago"
 }
 
 func (tf *TimeDurationFormatter) getDaysSince(duration time.Duration) string {
 	days := duration.Hours() / 24
 	if days >= 1 {
-		return fmt.Sprintf("%d days | ", int(days))
+		return fmt.Sprintf("%d days", int(days))
 	}
 	return ""
 }

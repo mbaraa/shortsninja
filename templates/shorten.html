@@ -3,7 +3,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Shorten a URL</title>
+    <title>Shorts Ninja</title>
+    <link rel="icon"
+          href="https://raw.githubusercontent.com/baraa-almasri/shortsninja_chrome_extension/main/logo_128.png"
+          type="image/icon type">
     <style>
         body, form, input, p {
             font-family: Sans;
@@ -17,22 +20,18 @@
 
 <script>
     function shorten(url) {
-        let token = document.cookie;
-
-        if (token !== "") {
-            token = token.substring("token=".length);
-        }
         const xhttp = new XMLHttpRequest();
-        // load user data if existed!
-        xhttp.open("GET", "/shorten/?url=" + url + "&token=" + token, false);
+        xhttp.open("GET", "/shorten/?url=" + url, false);
         xhttp.send();
 
         const resp = JSON.parse(xhttp.responseText);
         if (resp["valid_url"]) {
             const short = document.getElementById("short");
-            short.href = "http://" + resp["short"];
+            short.href = "https://" + resp["short"];
             short.textContent = resp["short"];
-            short.style = "text-decoration: underline; color: #4285F4; font-size: 20px";
+            short.style = "text-decoration: underline; color: #4285F4; font-size: 22px";
+
+            document.getElementById("copyURL").hidden = false
         } else {
             window.alert("enter a valid url!");
         }
@@ -60,9 +59,10 @@
         <input style="height: 45px; width: min-content; font-size: 25px"
                type="submit" value="Shorten">
         <br/><br/>
-        <a style="font-size: 17px" id="short" target="_blank" href="/">Your short URL will appear here :)</a>
         <input style="height: 25px; font-size: 17px" type="button" onclick="copyToClipboard(short.href)"
-               value="Copy URL">
+               value="Copy URL" hidden id="copyURL">
+        &nbsp;&nbsp;
+        <a style="font-size: 17px" id="short" target="_blank" href="/">Your short URL will appear here :)</a>
         <br/><br/>
     </form>
 </fieldset>

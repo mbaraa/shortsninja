@@ -68,7 +68,7 @@ func (router *Router) handleRoutes() *mux.Router {
 // createShortURL creates a short url for the given url
 // GET /shorten/?url=http://someurl.com
 func (router *Router) createShortURL(res http.ResponseWriter, req *http.Request) {
-	user := router.userManager.GetUserFromToken(req)
+	user := router.userManager.GetUserFromIP(req)
 	url := req.URL.Query()["url"][0]
 
 	resp := make(map[string]interface{})
@@ -101,6 +101,8 @@ func (router *Router) removeURL(res http.ResponseWriter, req *http.Request) {
 	router.urlManager.RemoveURL(req.URL.Query()["short"][0], req)
 }
 
+// getURLData loads a specific URL's data into a weird ass table
+// GET /url_data/?short=shortURL
 func (router *Router) getURLData(res http.ResponseWriter, req *http.Request) {
 	router.uiManager.HandleURLDataTracking(res, req)
 }
@@ -119,8 +121,8 @@ func (router *Router) handleURLOps() {
 }
 
 func (router *Router) handleUI() {
-	router.multiplexer.HandleFunc("/", router.uiManager.GetPageByName("shorten")).Methods("GET")
-	router.multiplexer.HandleFunc("/about/", router.uiManager.GetPageByName("about")).Methods("GET")
+	router.multiplexer.HandleFunc("/", router.uiManager.GetPageHandlerByName("shorten")).Methods("GET")
+	router.multiplexer.HandleFunc("/about/", router.uiManager.GetPageHandlerByName("about")).Methods("GET")
 	router.multiplexer.HandleFunc("/tracking/", router.uiManager.HandleTracking).Methods("GET")
 	router.multiplexer.HandleFunc("/user_info/", router.uiManager.HandleUserInfo).Methods("GET")
 	router.multiplexer.HandleFunc("/url_data/", router.uiManager.HandleURLDataTracking).Methods("GET")
