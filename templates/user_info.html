@@ -31,7 +31,18 @@
         <th><p>Created</p></th>
         <td>&nbsp;{{ .Created }}</td>
     </tr>
+    <tr>
+        <th colspan="2"><p onclick="logout()" style="color: rgb(222, 11, 75); cursor: pointer;">Logout</p></th>
+    </tr>
 </table>
+
+<script type="application/javascript">
+    function logout() {
+        if (window.confirm("Are you sure you want to logout?")) {
+            window.open("/logout/", "_self");
+        }
+    }
+</script>
 
 {{ else }}
 <fieldset style="border-color: #4285F4; box-shadow: 0 0 10px 5px #4285F4">

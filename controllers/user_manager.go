@@ -50,6 +50,18 @@ func (um *UserManager) GetURLsOfUser(user *models.User) []*models.URL {
 	return urls
 }
 
+// Logout deletes the current session of a user
+func (um *UserManager) Logout(res http.ResponseWriter, req *http.Request) {
+	callerData := um.reqData.GetURLDataFromRequestData(req)
+	session := &models.Session{
+		IP:        callerData.IP,
+		UserEmail: "",
+		UserAgent: callerData.UserAgent,
+	}
+	_ = um.db.RemoveSession(session)
+	http.Redirect(res, req, "/", http.StatusPermanentRedirect)
+}
+
 // getDummyUser returns an unsigned-in user!
 func (um *UserManager) getDummyUser() *models.User {
 	return &models.User{

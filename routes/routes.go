@@ -131,4 +131,5 @@ func (router *Router) handleUI() {
 func (router *Router) handleUserOps() {
 	router.multiplexer.HandleFunc("/login/", router.googleLoginManager.LoginWithGoogle).Methods("GET")
 	router.multiplexer.HandleFunc("/login_callback/", router.googleLoginManager.HandleCallback).Methods("GET")
+	router.multiplexer.HandleFunc("/logout/", router.userManager.Logout).Methods("GET")
 }
