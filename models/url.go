@@ -7,4 +7,5 @@ type URL struct {
 	Created   string
 	Visits    int
 	UserEmail string
+	Alter     bool
 }

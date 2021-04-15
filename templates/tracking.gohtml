@@ -21,6 +21,16 @@
             .middle_col {
                 box-shadow: 0 0 1px 1px #4285F4;
             }
+
+            .url1 {
+                background: #ffffff;
+                border-radius: 10px 10px 10px 10px;
+            }
+
+            .url2 {
+                background-color: #eeeeee;
+                border-radius: 10px 10px 10px 10px;
+            }
         </style>
     </head>
     <body>
@@ -32,30 +42,30 @@
     <input id="dummyText" type="text" hidden>
 
     {{ if .URLs }}
-    <table style="font-size: 15px;" class="navbar">
+    <table style="font-size: 15px; box-shadow: 0 0 0 0;" class="navbar">
         <tr>
-            <th colspan="1">Short URL</th>
-            <th colspan="3">Full URL</th>
-            <th colspan="2">Created</th>
-            <th colspan="1">Visits</th>
-            <th colspan="1">Operations</th>
+            <th colspan="1" class="first_col">Short URL</th>
+            <th colspan="3" class="middle_col">Full URL</th>
+            <th colspan="2" class="middle_col">Created</th>
+            <th colspan="1" class="middle_col">Visits</th>
+            <th colspan="1" class="last_col">Operations</th>
         </tr>
         {{ range .URLs }}
 
-            <tr>
+            <tr class="url{{ if .Alter}}1{{ else }}2{{ end }}">
                 <td colspan="1" class="first_col">&nbsp;&nbsp;
                     <img style="cursor: pointer" onclick="copyToClipboard('https://shorts.ninja/{{ .Short }}')"
                          title="copy short url"
                          src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABmJLR0QA/wD/AP+gvaeTAAAEFklEQVRIiZ2VX4iUZRTGf8/5vp3ZHSUiai8Wcmd2tWCFsCiJrpbodukfdFcJXolQSOoaEY5IqGMXEogXYQmSdVFZgneJG1RoEJhIhP/2W1mWkGURdWfH3fnO6WJ211Un0d6rF95z3uc8v/ec7xPAaLm2RhbDhNYGdAIGuIiboG8j6jsrWbXB/1jKemvPYRwHuoFJIppIAA6kQDehH4J0fSXbdO1hBSyM7UB3BDsKHba6tGzm6cKt+qqI+qpkLl1NxFnwN8TcVxdWfvbIwwqkwNqIuNpMu/ZVzr93/a7zRlapjQNrgMGOfGY78MFDCQg6Qddni1PtGYsmwYij9wtJTGX9e1829+V5YAAyzc5ZnF11cXi8XbqBUgQDT+DtAgLOJ3Ppm8AzzVynI48Tjn4UOgo6SnC8o6k/Rst7XmvrAJyI/7ZY76p/3BWdLwp9DtY0yw/loSmTXK0SDPEWwdej5dqGSrb10F0CBgQjwMX+XSuTPFl/h8UbdtgTXy8oRMSG8ui2Oy4AyCo1R2wW7M96a1Ye2/rFokAQ3upKUKRlKba1CguQcMtPi+gBu5km+S9tMQY3aN1RCuNA1re3Ub685QiAtRAFg0BXqjO5GJIYkmlIYgh0CoeItk/UKkw0iSAIFFEI94Njldo7AKkwAhgB+pt5OXH7cOmTuOXDSdh8gXlbAUdXJK4L0hAmKATan/XWJlNgEdEc9miieGkpInM9ju7fCJXR6SPj/cVTPtdR8CRSua/E+BKLT9IAmE/uakz/Vu8qriouSS523vqnXu/cCOBz+KW+3SuSsF8jWJzqbMGcOQq92luZOTY2VroWQTkVEGopNIrLn0/dv1sKoj5TehccyYAcN3mSMyXRbGvH8tnbAGQpgOYJQ96IYFwLzCKIsLo0nwDMFmeuJvVlb5tHuvTeZqrx/kvTk6LqJ5+sphUByNIAX0DUNzr8O/Ds3UVlld0fMT/opelijxQ/h+JRAElEBEmuTaK6D2AQGANwJxWaQtHdd3n5U8BfbW23vAM5xULHzVvN/BsiSsjmawtCcW+uGWkoDirYFUl+NKvUDkfo5u0Ix9yPBbBAbdoLs6nP/AlJJ4udlaBgYLS8d8At/36ExkRl/iTF6/uCUkVoXRA7F1tKAoSbZUa4hyMgbU4/JiW7IvwORAt7SM4NwsTYgkAlqzZisLoxy0oHQGtkUSIwhSzkLveznphLYq4jt9CyyTRvDBvWCeABC2PoAcXE/75NIFw8wMrKe44HGjS3F3qvbL7PO7XWRE+1NFssXQAK9iACYTqHKEUSGyd6qqX7xZ4crKazHV3raP3jzzyQg9HyrjKyE0JlYAKiDmrz9QsDFYCeCOqg1x9IAGBsxacDbrET8lekxMBbo2HGPXvsTC529F/e8tO/+wXlevsyptoAAAAASUVORK5CYII=">
                     <a style=" color: #ff00ff; text-decoration: underline" href="https://shorts.ninja/{{ .Short }}">
-                        &nbsp;shorts.ninja/{{ .Short }}
+                        shorts.ninja/{{ .Short }}
                     </a>
                 </td>
                 <td colspan="3" class="middle_col">&nbsp;&nbsp;
                     <img style="cursor: pointer;" onclick="copyToClipboard('{{ .FullURL }}')" title="copy url"
                          src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABmJLR0QA/wD/AP+gvaeTAAAEFklEQVRIiZ2VX4iUZRTGf8/5vp3ZHSUiai8Wcmd2tWCFsCiJrpbodukfdFcJXolQSOoaEY5IqGMXEogXYQmSdVFZgneJG1RoEJhIhP/2W1mWkGURdWfH3fnO6WJ211Un0d6rF95z3uc8v/ec7xPAaLm2RhbDhNYGdAIGuIiboG8j6jsrWbXB/1jKemvPYRwHuoFJIppIAA6kQDehH4J0fSXbdO1hBSyM7UB3BDsKHba6tGzm6cKt+qqI+qpkLl1NxFnwN8TcVxdWfvbIwwqkwNqIuNpMu/ZVzr93/a7zRlapjQNrgMGOfGY78MFDCQg6Qddni1PtGYsmwYij9wtJTGX9e1829+V5YAAyzc5ZnF11cXi8XbqBUgQDT+DtAgLOJ3Ppm8AzzVynI48Tjn4UOgo6SnC8o6k/Rst7XmvrAJyI/7ZY76p/3BWdLwp9DtY0yw/loSmTXK0SDPEWwdej5dqGSrb10F0CBgQjwMX+XSuTPFl/h8UbdtgTXy8oRMSG8ui2Oy4AyCo1R2wW7M96a1Ye2/rFokAQ3upKUKRlKba1CguQcMtPi+gBu5km+S9tMQY3aN1RCuNA1re3Ub685QiAtRAFg0BXqjO5GJIYkmlIYgh0CoeItk/UKkw0iSAIFFEI94Njldo7AKkwAhgB+pt5OXH7cOmTuOXDSdh8gXlbAUdXJK4L0hAmKATan/XWJlNgEdEc9miieGkpInM9ju7fCJXR6SPj/cVTPtdR8CRSua/E+BKLT9IAmE/uakz/Vu8qriouSS523vqnXu/cCOBz+KW+3SuSsF8jWJzqbMGcOQq92luZOTY2VroWQTkVEGopNIrLn0/dv1sKoj5TehccyYAcN3mSMyXRbGvH8tnbAGQpgOYJQ96IYFwLzCKIsLo0nwDMFmeuJvVlb5tHuvTeZqrx/kvTk6LqJ5+sphUByNIAX0DUNzr8O/Ds3UVlld0fMT/opelijxQ/h+JRAElEBEmuTaK6D2AQGANwJxWaQtHdd3n5U8BfbW23vAM5xULHzVvN/BsiSsjmawtCcW+uGWkoDirYFUl+NKvUDkfo5u0Ix9yPBbBAbdoLs6nP/AlJJ4udlaBgYLS8d8At/36ExkRl/iTF6/uCUkVoXRA7F1tKAoSbZUa4hyMgbU4/JiW7IvwORAt7SM4NwsTYgkAlqzZisLoxy0oHQGtkUSIwhSzkLveznphLYq4jt9CyyTRvDBvWCeABC2PoAcXE/75NIFw8wMrKe44HGjS3F3qvbL7PO7XWRE+1NFssXQAK9iACYTqHKEUSGyd6qqX7xZ4crKazHV3raP3jzzyQg9HyrjKyE0JlYAKiDmrz9QsDFYCeCOqg1x9IAGBsxacDbrET8lekxMBbo2HGPXvsTC529F/e8tO/+wXlevsyptoAAAAASUVORK5CYII=">
                     <a style=" color: #4285F4; text-decoration: underline;"
-                       href="{{ .FullURL }}">&nbsp;{{ .FullURL }}</a>
+                       href="{{ .FullURL }}">{{ .FullURL }}</a>
                 </td>
                 <td colspan="2" style=" color: #4285F4;" class="middle_col">&nbsp; {{ .Created }}</td>
                 <td colspan="1" style=" color: #4285F4;" class="middle_col">&nbsp; {{ .Visits }}</td>
@@ -65,10 +75,8 @@
                     <img style="cursor: pointer" onclick="window.open('/url_data/?short='+{{ .Short }}, '_self')"
                          title="view more url data"
                          src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABmJLR0QA/wD/AP+gvaeTAAACM0lEQVRIiaWWQW4TQRBF32+PPCTKGWBipFmQS3AKDoEiC4QICwQyGyMnIKJchQXXYJMNErF9BzCy5XSx6HFPj2N7HCip1dWjqv5dv363RgCT3ug5xggctXnC2ldrXRbjs3cA0+OLZ0u5749vXv2gxRyAebqgI7Bk6MiqGXRkortKusXKji2/Th9+7O0FEM1S31Di301SaVmnFcTFycAwzMJAqqNSn0CamWHennjnvv3sfS5bADwIJMWxXtB6kiQIsTvpihWEk5NsnFC0BuVXn1afTaV3m+mKPRBCgaKr2eEs/334JwfebqrDRVDDItKKrmF5NxYwARLO4U+uB4uT68HCzC9DHarVGuMrilDtS2XHmpXEHmxjXRBUlOjN34lKgFHpM0WQLOJYZL4/KUZ9S1Joiojj8WwIDHfgRMviNgp9AFwoPW4f/OTYYrCriIZtp6iqaBNF9zEBjIuLF2BfwHCOy0c3b14CTIvzMy9GjQwzJIXLCFt9k173xmefsliBglq8bzZ6jf54q5Xc7k2+vPeQNpnqoglnTwcZwGQSiEn7ESsIb8tW35xzCcCKcgOjP5kc9JHizhufDNvDrwFqilrtfymS8GYstQMrSrdKNizbmyKJq2IcVLSPTYvz9wYfGuiJtaqozTz3pygbF4MH+QI37+LzRVDSyk9nABM591GRGadwcDrPw0nmeX3aeR4CF7niTXcxd0+KWu1fVCTHAtOvxp/KtrfHe3BVkGerL3WWAH8Be84xZx6KPLQAAAAASUVORK5CYII=">
-
                 </th>
             </tr>
-
         {{ end }}
     </table>
 

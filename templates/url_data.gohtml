@@ -21,6 +21,16 @@
             .middle_col {
                 box-shadow: 0 0 1px 1px #4285F4;
             }
+
+            .url1 {
+                background: #ffffff;
+                border-radius: 10px 10px 10px 10px;
+            }
+
+            .url2 {
+                background-color: #eeeeee;
+                border-radius: 10px 10px 10px 10px;
+            }
         </style>
     </head>
     <body>
@@ -31,21 +41,19 @@
     {{ if .Email }}
 
         {{ if .URLData }}
-            <table class="navbar" style="font-size: 15px;">
+            <table class="navbar" style="font-size: 20px; box-shadow: 0 0 0 0">
                 <tr>
-                    <th colspan="1">IP</th>
-                    <th colspan="1">User Agent</th>
-                    <th colspan="1">Visit Location</th>
-                    <th colspan="1">Visit Time</th>
+                    <th colspan="1" class="first_col">IP</th>
+                    <th colspan="1" class="middle_col">User Agent</th>
+                    <th colspan="1" class="middle_col">Visit Location</th>
+                    <th colspan="1" class="last_col">Visit Time</th>
                 </tr>
                 {{ range .URLData }}
-
-                    <tr>
+                    <tr class="url{{ if .Alter}}1{{ else }}2{{ end }}">
                         <td colspan="1" style=" color: #4285F4;" class="first_col">&nbsp; {{ .IP }}</td>
                         <td colspan="1" style=" color: #4285F4;" class="middle_col">&nbsp; {{ .UserAgent }}</td>
                         <td colspan="1" style=" color: #4285F4;" class="middle_col">&nbsp; {{ .VisitLocation }}</td>
                         <td colspan="1" style=" color: #4285F4;" class="last_col">&nbsp; {{ .VisitTime }}</td>
-
                     </tr>
 
                 {{ end }}

@@ -130,6 +130,7 @@ func (s *SQLite) GetURLs(user *User) ([]*URL, error) {
 	}
 	defer rows.Close()
 
+	alter := false
 	var urls []*URL
 	var url *URL
 	var timeStamp time.Time
@@ -137,6 +138,7 @@ func (s *SQLite) GetURLs(user *User) ([]*URL, error) {
 	for rows.Next() {
 		url = new(URL)
 
+		url.Alter = alter
 		err = rows.Scan(&url.Short, &url.FullURL, &timeStamp)
 		if err != nil {
 			return nil, err
@@ -145,6 +147,7 @@ func (s *SQLite) GetURLs(user *User) ([]*URL, error) {
 		url.Created = (new(TimeDurationFormatter)).GetDurationSince(timeStamp.Unix())
 		url.Visits = 0
 		urls = append(urls, url)
+		alter = !alter
 	}
 
 	return urls, nil
@@ -229,6 +232,7 @@ func (s *SQLite) GetURLData(url *URL) ([]*URLData, error) {
 	}
 	defer rows.Close()
 
+	alter := false
 	var urlDatas []*URLData
 	var urlData *URLData
 	var timeStamp *time.Time
@@ -237,6 +241,7 @@ func (s *SQLite) GetURLData(url *URL) ([]*URLData, error) {
 		urlData = new(URLData)
 		timeStamp = new(time.Time)
 
+		urlData.Alter = alter
 		err = rows.Scan(&urlData.ShortURL, &urlData.IP, &urlData.UserAgent, &urlData.VisitLocation, &timeStamp)
 		if err != nil {
 			return nil, err
@@ -245,6 +250,7 @@ func (s *SQLite) GetURLData(url *URL) ([]*URLData, error) {
 		urlData.VisitTime = timeStamp.Format("Mon Jan/2/2006 15:04 MST")
 
 		urlDatas = append(urlDatas, urlData)
+		alter = !alter
 	}
 
 	// happily ever after

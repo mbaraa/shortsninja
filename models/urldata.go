@@ -7,4 +7,5 @@ type URLData struct {
 	UserAgent     string
 	VisitLocation string
 	VisitTime     string
+	Alter         bool
 }
