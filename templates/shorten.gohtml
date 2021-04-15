@@ -1,0 +1,82 @@
+{{ define "shorten" }}
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Shorts Ninja</title>
+        <link rel="icon"
+              href="https://raw.githubusercontent.com/baraa-almasri/shortsninja/main/res/logo_128.png"
+              type="image/icon type">
+        <style>
+            body, form, input, p {
+                font-family: Sans;
+            }
+
+            #short:visited, #short {
+                color: #111111;
+                text-decoration: none;
+                font-family: Sans;
+            }
+        </style>
+    </head>
+    <body>
+
+    {{ template "navbar" . }}
+    <br/>
+    <input id="dummyText" type="text" hidden>
+
+    <table class="navbar">
+        <tr>
+            <td>
+                <br/>
+                <form onsubmit="shorten(url.value); return false;">
+                    <input style="height: 40px; width: 60%; font-size: 20px; margin-left: 2%" autofocus
+                           type="text" name="url" placeholder="Type/Paste a URL to be shortened!">
+                    <input style="height: 45px; width: min-content; font-size: 25px"
+                           type="submit" value="Shorten">
+                    <br/><br/>
+                    <input style="height: 25px; font-size: 17px; margin: 0 2% 0 1%" type="button"
+                           onclick="copyToClipboard(short.href)"
+                           value="Copy URL" hidden id="copyURL">
+                    <a style="font-size: 17px; margin-left: 3%" id="short" target="_blank" href="/">Your short URL will
+                        appear here : )</a>
+                    <br/><br/>
+                </form>
+            </td>
+        </tr>
+    </table>
+
+    <script>
+        function shorten(url) {
+            const xhttp = new XMLHttpRequest();
+            xhttp.open("GET", "/shorten/?url=" + url, false);
+            xhttp.send();
+
+            const resp = JSON.parse(xhttp.responseText);
+            if (resp["valid_url"]) {
+                const short = document.getElementById("short");
+                short.href = "https://" + resp["short"];
+                short.textContent = resp["short"];
+                short.style = "text-decoration: underline; color: #4285F4; font-size: 22px";
+
+                document.getElementById("copyURL").hidden = false
+            } else {
+                window.alert("enter a valid url!");
+            }
+        }
+
+        function copyToClipboard(str) {
+            let textArea = document.getElementById("dummyText");
+            textArea.hidden = false;
+            textArea.value = str;
+            textArea.select();
+            textArea.setSelectionRange(0, 99999);
+            document.execCommand("copy");
+
+            textArea.hidden = true;
+        }
+    </script>
+
+    </body>
+    </html>
+{{ end }}

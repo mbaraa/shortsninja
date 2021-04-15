@@ -1,0 +1,79 @@
+{{ define "navbar" }}
+    <style>
+        @font-face {
+            font-family: Sans;
+            src: url("data:font/truetype;charset=utf-8;base64,{{ .FontB64 }}");
+        }
+
+        .navbar {
+            border-collapse: collapse;
+            border-radius: 10px 10px 10px 10px;
+            width: 90%;
+            height: 5%;
+            box-shadow: 0 0 1px 1px #4285F4;
+            position: relative;
+            margin: 1% auto auto auto;
+            font-family: Sans;
+        }
+
+        label {
+            color: #0C0C14;
+        }
+
+        .navbar_col:hover {
+            background: #cccccc;
+        }
+
+        .navbar_row {
+            border-radius: 10px;
+        }
+
+        .navbar_col {
+            box-shadow: 0 0 1px 1px #4285F4;
+            width: 10%;
+            cursor: pointer;
+        }
+
+        .separator {
+            box-shadow: 0 0 1px 1px #4285F4;
+            font-size: 0.01em;
+        }
+
+        .separator:hover {
+            background: inherit;
+        }
+
+        .user_logo {
+            border-radius: 100%;
+        }
+
+    </style>
+    <table class="navbar">
+        <tr class="navbar_row">
+            <th class="navbar_col" onclick="window.open('/user_info/', '_self')"
+                style="border-radius: 10px 0 0 10px">
+                {{ if .Email }}
+                    <img class="user_logo" src="{{ .Avatar }}" width="50" height="50" alt="username"/>
+                {{ else }}
+                    <img class="user_logo" src="data:image/jpg;base64,{{ .Avatar }}" width="50" height="50"
+                         alt="username"/>
+                {{ end }}
+            </th>
+
+            <th class="navbar_col" onclick="window.open('/', '_self')">
+                &nbsp;<label>Shortening</label>&nbsp;
+            </th>
+
+            <th class="navbar_col" onclick="window.open('/tracking/', '_self')">
+                &nbsp;<label>Tracking</label>&nbsp;
+            </th>
+
+            <td style="width: auto;" class="separator"></td>
+
+            <th class="navbar_col" onclick="window.open('/about/', '_self')"
+                style="border-radius: 0 10px 10px 0">
+                &nbsp;<label>About</label>&nbsp;
+            </th>
+        </tr>
+    </table>
+{{ end }}

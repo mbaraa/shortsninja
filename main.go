@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	templates := template.Must(template.ParseGlob("./templates/*.html"))
+	templates := template.Must(template.ParseGlob("./templates/*"))
 	dbManager := models.NewSQLiteDB()
 	conf := config.LoadConfig()
 
