@@ -6,9 +6,11 @@ import (
 	"github.com/baraa-almasri/shortsninja/config"
 	"github.com/baraa-almasri/shortsninja/models"
 	"github.com/baraa-almasri/useless"
+	"github.com/google/uuid"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 	"net/http"
+	"time"
 )
 
 // GoogleLogin holds google login handlers
@@ -70,11 +72,20 @@ func (g *GoogleLogin) HandleCallback(w http.ResponseWriter, r *http.Request) {
 	data := make(map[string]interface{})
 	json.NewDecoder(dataResponse.Body).Decode(&data)
 
-	callerData := g.reqData.GetURLDataFromRequestData(r)
+	token1 := uuid.New().String()
+	expireTime := time.Now().AddDate(0, 1, 1)
+
 	_ = g.dbMan.AddSession(&models.Session{
-		IP:        callerData.IP,
-		UserAgent: callerData.UserAgent,
 		UserEmail: data["email"].(string),
+		Token:     token1,
+		ExpiresAt: expireTime,
+	})
+
+	http.SetCookie(w, &http.Cookie{
+		Name:    "token",
+		Value:   token1,
+		Expires: expireTime,
+		Path:    "/",
 	})
 
 	_ = g.dbMan.AddUser(&models.User{
@@ -83,5 +94,5 @@ func (g *GoogleLogin) HandleCallback(w http.ResponseWriter, r *http.Request) {
 	})
 
 	// go back to the home page
-	http.Redirect(w, r, "/", http.StatusFound)
+	http.Redirect(w, r, "/", 308)
 }

@@ -27,93 +27,76 @@ func NewUIManager(userManager *UserManager, urlManager *URLManager,
 	}
 }
 
-// GetPageByName returns a handler function depending on page name
+// GetPageHandlerByName returns a handler function depending on page name
 func (ui *UIManager) GetPageHandlerByName(pageName string) func(res http.ResponseWriter, req *http.Request) {
 	return func(res http.ResponseWriter, req *http.Request) {
-		ui.renderPageFromUserIP(pageName, res, req)
+		user := ui.userManager.GetUserFromRequest(req)
+		ui.renderPageFromUserIP(pageName, res, ui.getBasicUserData(user))
 	}
 }
 
 // HandleTracking renders the URLs tracking page of a specific user
 func (ui *UIManager) HandleTracking(res http.ResponseWriter, req *http.Request) {
-	user := ui.userManager.GetUserFromIP(req)
+	user := ui.userManager.GetUserFromRequest(req)
+	urls := ui.userManager.GetURLsOfUser(user)
+	var urlData []*models.URLData
 
-	urls := make([]*models.URL, 1)
-	if user.Email != "" {
-		urls = ui.userManager.GetURLsOfUser(user)
-		var urlData []*models.URLData
-
-		for _, url := range urls {
-			urlData = ui.urlManager.GetURLData(url)
-			url.Visits = len(urlData)
-		}
-
+	for _, url := range urls {
+		urlData = ui.urlManager.GetURLData(url)
+		url.Visits = len(urlData)
 	}
 
-	// no error to be handled since it's being called by the router only :)
-	_ = ui.templates.ExecuteTemplate(res, "tracking", map[string]interface{}{
-		"Avatar":  user.Avatar,
-		"Email":   user.Email,
-		"FontB64": ui.conf.Font,
-		"URLs":    urls,
-	})
+	ui.renderPageFromUserIP("tracking", res, mergeMaps(ui.getBasicUserData(user), map[string]interface{}{
+		"URLs": urls,
+	}))
 }
 
 // HandleURLDataTracking renders the URLs tracking page of a specific user
 func (ui *UIManager) HandleURLDataTracking(res http.ResponseWriter, req *http.Request) {
-	user := ui.userManager.GetUserFromIP(req)
+	user := ui.userManager.GetUserFromRequest(req)
+	var urlData []*models.URLData
 
-	urlData := make([]*models.URLData, 1)
-
-	if shortURL := req.URL.Query()["short"]; user.Email != "" && shortURL != nil {
+	if shortURL := req.URL.Query()["short"]; user != nil && shortURL != nil {
 		url := ui.urlManager.GetURL(shortURL[0])
 		if user.Email != url.UserEmail {
 			goto ignoreData
 		}
 		urlData = ui.urlManager.GetURLData(url)
-
 	}
 
 ignoreData:
-	// no error to be handled since it's being called by the router only :)
-	_ = ui.templates.ExecuteTemplate(res, "url_data", map[string]interface{}{
-		"Avatar":  user.Avatar,
-		"Email":   user.Email,
-		"FontB64": ui.conf.Font,
+	ui.renderPageFromUserIP("url_data", res, mergeMaps(ui.getBasicUserData(user), map[string]interface{}{
 		"URLData": urlData,
-	})
+	}))
 }
 
 // HandleUserInfo renders the user info page
 func (ui *UIManager) HandleUserInfo(res http.ResponseWriter, req *http.Request) {
+	user := ui.userManager.GetUserFromRequest(req)
+	urls := ui.userManager.GetURLsOfUser(user)
 
-	user := ui.userManager.GetUserFromIP(req)
-
-	urls := make([]*models.URL, 1)
-	if user.Email != "" {
-		urls = ui.userManager.GetURLsOfUser(user)
-	}
-	numURLs := len(urls)
-
-	// no error to be handled since it's being called by the router only :)
-	_ = ui.templates.ExecuteTemplate(res, "login", map[string]interface{}{
-		"Avatar":  user.Avatar,
-		"Email":   user.Email,
+	ui.renderPageFromUserIP("login", res, mergeMaps(ui.getBasicUserData(user), map[string]interface{}{
 		"Created": user.Created,
-		"FontB64": ui.conf.Font,
-		"NumURLs": numURLs,
-	})
-
+		"NumURLs": len(urls),
+	}))
 }
 
 // renderPageFromUserIP generates the required web page with the given user's data
-func (ui *UIManager) renderPageFromUserIP(pageName string, res http.ResponseWriter, req *http.Request) {
-	user := ui.userManager.GetUserFromIP(req)
+func (ui *UIManager) renderPageFromUserIP(pageName string, res http.ResponseWriter, data map[string]interface{}) {
+	_ = ui.templates.ExecuteTemplate(res, pageName, data)
+}
 
-	// no error to be handled since it's being called by the router only :)
-	_ = ui.templates.ExecuteTemplate(res, pageName, map[string]string{
+func (ui *UIManager) getBasicUserData(user *models.User) map[string]interface{} {
+	return map[string]interface{}{
 		"Avatar":  user.Avatar,
 		"Email":   user.Email,
 		"FontB64": ui.conf.Font,
-	})
+	}
+}
+
+func mergeMaps(src map[string]interface{}, dist map[string]interface{}) map[string]interface{} {
+	for key, value := range src {
+		dist[key] = value
+	}
+	return dist
 }

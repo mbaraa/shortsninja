@@ -3,6 +3,7 @@ package controllers
 import (
 	"github.com/baraa-almasri/shortsninja/models"
 	"net/http"
+	"time"
 )
 
 // UserManager holds different user operations
@@ -19,14 +20,32 @@ func NewUserManager(dbManager models.Database, requestDataManager *RequestDataMa
 	}
 }
 
-// GetUserFromIP returns a user from the database using the caller ip it was called from!
-func (um *UserManager) GetUserFromIP(req *http.Request) *models.User {
-	callerData := um.reqData.GetURLDataFromRequestData(req)
+// GetUserFromRequest returns a user from the database using the caller ip it was called from!
+func (um *UserManager) GetUserFromRequest(req *http.Request) *models.User {
 	return um.getUserFromDB(&models.Session{
-		IP:        callerData.IP,
-		UserEmail: "",
-		UserAgent: callerData.UserAgent,
+		Token: um.getTokenFromRequest(req),
 	})
+}
+
+// SetToken sets token as cookie in the page
+func (um *UserManager) SetToken(w http.ResponseWriter, r *http.Request) {
+	if token := um.getTokenFromRequest(r); token != "" {
+		http.SetCookie(w, &http.Cookie{
+			Name:    "token",
+			Value:   token,
+			Expires: time.Now().AddDate(0, 1, 0),
+			Path:    "/",
+		})
+	}
+}
+
+// getTokenFromRequest returns the token from the cookie if exists, otherwise returns an empty string
+func (um *UserManager) getTokenFromRequest(req *http.Request) string {
+	token, err := req.Cookie("token")
+	if err == nil {
+		return token.Value
+	}
+	return ""
 }
 
 // getUserFromDB returns a user using the given IP address, if no user exists
@@ -52,14 +71,18 @@ func (um *UserManager) GetURLsOfUser(user *models.User) []*models.URL {
 
 // Logout deletes the current session of a user
 func (um *UserManager) Logout(res http.ResponseWriter, req *http.Request) {
-	callerData := um.reqData.GetURLDataFromRequestData(req)
-	session := &models.Session{
-		IP:        callerData.IP,
-		UserEmail: "",
-		UserAgent: callerData.UserAgent,
-	}
-	_ = um.db.RemoveSession(session)
-	http.Redirect(res, req, "/", http.StatusPermanentRedirect)
+	_ = um.db.RemoveSession(&models.Session{
+		Token: um.getTokenFromRequest(req),
+	})
+	http.Redirect(res, req, "/", 308)
+}
+
+// GTFO magically logs out!
+func (um *UserManager) GTFO(res http.ResponseWriter, req *http.Request) {
+	_ = um.db.RemoveSession(&models.Session{
+		Token: um.getTokenFromRequest(req),
+	})
+	res.Write([]byte("<html><head></head><body><h1>you have logged out blyat!</h1><a href=\"/\">go home blyat!</a></body></html>"))
 }
 
 // getDummyUser returns an unsigned-in user!

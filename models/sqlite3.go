@@ -29,7 +29,7 @@ func NewSQLiteDB() *SQLite {
 	return instance
 }
 
-// mustInitSQLiteDB creates database's tables if possible, if
+// mustInitSQLiteDB creates database's tables if possible, if not the program crashes
 func mustInitSQLiteDB(db *sql.DB) {
 
 	_, err := db.Exec(`CREATE TABLE IF NOT EXISTS 
@@ -55,9 +55,9 @@ func mustInitSQLiteDB(db *sql.DB) {
 
 	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS 
 	SESSION (
-		ip VARCHAR(45),
 		user_email VARCHAR(255),
-		user_agent VARCHAR(4000)
+		token VARCHAR(40),
+		expires_at TIMESTAMP
 	);`)
 	if err != nil {
 		panic(err)
@@ -259,8 +259,8 @@ func (s *SQLite) GetURLData(url *URL) ([]*URLData, error) {
 
 // AddSession adds a new session to the database
 func (s *SQLite) AddSession(sess *Session) error {
-	_, err := s.manager.Exec(`INSERT INTO SESSION (ip, user_email, user_agent) VALUES (?, ? ,?)`,
-		sess.IP, sess.UserEmail, sess.UserAgent)
+	_, err := s.manager.Exec(`INSERT INTO SESSION (user_email, token, expires_at) VALUES (? ,?, ?)`,
+		sess.UserEmail, sess.Token, sess.ExpiresAt)
 	if err != nil {
 		return err
 	}
@@ -271,7 +271,7 @@ func (s *SQLite) AddSession(sess *Session) error {
 
 // RemoveSession a specific session from the database
 func (s *SQLite) RemoveSession(sess *Session) error {
-	_, err := s.manager.Exec(`DELETE FROM SESSION WHERE ip=? AND user_agent=?`, sess.IP, sess.UserAgent)
+	_, err := s.manager.Exec(`DELETE FROM SESSION WHERE token=?`, sess.Token)
 	if err != nil {
 		return err
 	}
@@ -282,7 +282,7 @@ func (s *SQLite) RemoveSession(sess *Session) error {
 
 // GetSession returns a specific session from the database
 func (s *SQLite) GetSession(sess *Session) (*Session, error) {
-	rows, err := s.manager.Query(`SELECT * FROM SESSION WHERE ip=? AND user_agent=?`, sess.IP, sess.UserAgent)
+	rows, err := s.manager.Query(`SELECT * FROM SESSION WHERE token=?`, sess.Token)
 	if err != nil {
 		return nil, err
 	}
@@ -290,8 +290,8 @@ func (s *SQLite) GetSession(sess *Session) (*Session, error) {
 
 	session := new(Session)
 	rows.Next()
-	err = rows.Scan(&session.IP, &session.UserEmail, &session.UserAgent)
-	if err != nil {
+	err = rows.Scan(&session.UserEmail, &session.Token, &session.ExpiresAt)
+	if err != nil || session.ExpiresAt.Unix() < time.Now().Unix() { // expired session :)
 		return nil, err
 	}
 

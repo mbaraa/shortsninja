@@ -54,10 +54,6 @@ func NewRouter(dbManager models.Database, templates *template.Template, config *
 
 // GetRoutes returns a gorilla mux router with the wanted routes
 func (router *Router) GetRoutes() *mux.Router {
-	return router.handleRoutes()
-}
-
-func (router *Router) handleRoutes() *mux.Router {
 	router.handleURLOps()
 	router.handleUI()
 	router.handleUserOps()
@@ -68,7 +64,7 @@ func (router *Router) handleRoutes() *mux.Router {
 // createShortURL creates a short url for the given url
 // GET /shorten/?url=http://someurl.com
 func (router *Router) createShortURL(res http.ResponseWriter, req *http.Request) {
-	user := router.userManager.GetUserFromIP(req)
+	user := router.userManager.GetUserFromRequest(req)
 	url := req.URL.Query()["url"][0]
 
 	resp := make(map[string]interface{})
@@ -132,4 +128,5 @@ func (router *Router) handleUserOps() {
 	router.multiplexer.HandleFunc("/login/", router.googleLoginManager.LoginWithGoogle).Methods("GET")
 	router.multiplexer.HandleFunc("/login_callback/", router.googleLoginManager.HandleCallback).Methods("GET")
 	router.multiplexer.HandleFunc("/logout/", router.userManager.Logout).Methods("GET")
+	router.multiplexer.HandleFunc("/GTFO/", router.userManager.GTFO).Methods("GET")
 }

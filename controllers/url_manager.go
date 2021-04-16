@@ -120,7 +120,7 @@ func (um *URLManager) TrackURLData(req *http.Request) {
 
 // RemoveURL removes a corresponding short URL from the database
 func (um *URLManager) RemoveURL(shortURL string, request *http.Request) {
-	user := um.userManager.GetUserFromIP(request)
+	user := um.userManager.GetUserFromRequest(request)
 	url, err := um.db.GetURL(shortURL)
 
 	if err == nil && user.Email == url.UserEmail {
