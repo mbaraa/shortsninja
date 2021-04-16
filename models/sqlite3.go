@@ -2,6 +2,7 @@ package models
 
 import (
 	"database/sql"
+	"github.com/baraa-almasri/shortsninja/utils"
 	_ "github.com/mattn/go-sqlite3"
 	"strings"
 	"time"
@@ -112,7 +113,7 @@ func (s *SQLite) GetURL(shortURL string) (*URL, error) {
 	rows.Next()
 	var timeStamp time.Time
 	err = rows.Scan(&url.Short, &url.FullURL, &timeStamp, &url.UserEmail)
-	url.Created = (new(TimeDurationFormatter)).GetDurationSince(timeStamp.Unix())
+	url.Created = (new(utils.TimeDurationFormatter)).GetDurationSince(timeStamp.Unix())
 	if err != nil {
 		return nil, err
 	}
@@ -144,7 +145,7 @@ func (s *SQLite) GetURLs(user *User) ([]*URL, error) {
 			return nil, err
 		}
 
-		url.Created = (new(TimeDurationFormatter)).GetDurationSince(timeStamp.Unix())
+		url.Created = (new(utils.TimeDurationFormatter)).GetDurationSince(timeStamp.Unix())
 		url.Visits = 0
 		urls = append(urls, url)
 		alter = !alter
@@ -193,7 +194,7 @@ func (s *SQLite) GetUser(user *User) (*User, error) {
 	if err != nil {
 		return nil, err
 	}
-	u.Created = (new(TimeDurationFormatter)).GetDurationSince(timeStamp.Unix())
+	u.Created = (new(utils.TimeDurationFormatter)).GetDurationSince(timeStamp.Unix())
 
 	// happily ever after
 	return u, nil

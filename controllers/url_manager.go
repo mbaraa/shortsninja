@@ -2,11 +2,9 @@ package controllers
 
 import (
 	"github.com/baraa-almasri/shortsninja/models"
+	"github.com/baraa-almasri/shortsninja/utils"
 	"github.com/baraa-almasri/useless"
-	"github.com/google/uuid"
-	"math/rand"
 	"net/http"
-	"strings"
 )
 
 // URLManager holds URL operations handlers
@@ -15,6 +13,7 @@ type URLManager struct {
 	reqData      *RequestDataManager
 	userManager  *UserManager
 	randomizer   *useless.RandASCII
+	uniqueID     *utils.UniqueID
 	db           models.Database
 }
 
@@ -26,18 +25,21 @@ func NewURLManager(urlValidator *URLValidator, requestDataManager *RequestDataMa
 		reqData:      requestDataManager,
 		userManager:  userManager,
 		randomizer:   randomStringGenerator,
+		uniqueID:     utils.NewUniqueID(randomStringGenerator),
 		db:           db,
 	}
 }
 
-// CreateShortURL adds a new short URL to the database
+// CreateShortURL creates and adds a new short URL handler to the database
+// if the url exists for the given user it returns its short handler
+// if the generated short url exists it regenerates a new short handler
 func (um *URLManager) CreateShortURL(url string, user *models.User) string {
 	if existingURL := um.getShortURL(url, user); existingURL != nil {
 		return existingURL.Short
 	}
 
 	newURL := &models.URL{
-		Short:     um.createUniqueShortURL(5),
+		Short:     um.uniqueID.GetUniqueString(),
 		FullURL:   url,
 		UserEmail: user.Email,
 	}
@@ -46,17 +48,6 @@ func (um *URLManager) CreateShortURL(url string, user *models.User) string {
 		um.CreateShortURL(url, user)
 	}
 	return newURL.Short
-}
-
-// createUniqueShortURL returns a string of specified length form a generated UUID4 string
-func (um *URLManager) createUniqueShortURL(length int) string {
-	uuidGen := uuid.New()
-	short := strings.ReplaceAll(uuidGen.String(), "-", "")
-	rand.Seed(int64(uuidGen.ClockSequence()))
-
-	lastIndex := rand.Intn(len(short)-length+1) + length
-
-	return short[lastIndex-length : lastIndex]
 }
 
 // checkURLExistence returns true if the URL exists for a certain user, and false otherwise
