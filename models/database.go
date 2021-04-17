@@ -4,11 +4,14 @@ package models
 type Database interface {
 	AddURL(*URL) error
 	RemoveURL(*URL) error
+	IncrementURLVisits(shortURL string) error
 	GetURL(shortURL string) (*URL, error)
 	GetURLs(*User) ([]*URL, error)
 
 	AddUser(*User) error
 	RemoveUser(*User) error
+	IncrementUserURLsCount(*User) error
+	DecrementUserURLsCount(*User) error
 	GetUser(*User) (*User, error)
 
 	AddURLData(*URLData) error

@@ -39,12 +39,6 @@ func (ui *UIManager) GetPageHandlerByName(pageName string) func(res http.Respons
 func (ui *UIManager) HandleTracking(res http.ResponseWriter, req *http.Request) {
 	user := ui.userManager.GetUserFromRequest(req)
 	urls := ui.userManager.GetURLsOfUser(user)
-	var urlData []*models.URLData
-
-	for _, url := range urls {
-		urlData = ui.urlManager.GetURLData(url)
-		url.Visits = len(urlData)
-	}
 
 	ui.renderPageFromUserIP("tracking", res, mergeMaps(ui.getBasicUserData(user), map[string]interface{}{
 		"URLs": urls,
@@ -57,7 +51,7 @@ func (ui *UIManager) HandleURLDataTracking(res http.ResponseWriter, req *http.Re
 	var urlData []*models.URLData
 
 	if shortURL := req.URL.Query()["short"]; user != nil && shortURL != nil {
-		url := ui.urlManager.GetURL(shortURL[0])
+		url := ui.urlManager.getFullURL(shortURL[0])
 		if user.Email != url.UserEmail {
 			goto ignoreData
 		}
@@ -73,11 +67,10 @@ ignoreData:
 // HandleUserInfo renders the user info page
 func (ui *UIManager) HandleUserInfo(res http.ResponseWriter, req *http.Request) {
 	user := ui.userManager.GetUserFromRequest(req)
-	urls := ui.userManager.GetURLsOfUser(user)
 
 	ui.renderPageFromUserIP("login", res, mergeMaps(ui.getBasicUserData(user), map[string]interface{}{
 		"Created": user.Created,
-		"NumURLs": len(urls),
+		"NumURLs": user.NumURLs,
 	}))
 }
 

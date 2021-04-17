@@ -5,5 +5,6 @@ type User struct {
 	Email   string
 	Avatar  string
 	Created string
+	NumURLs int
 	Alter   bool
 }

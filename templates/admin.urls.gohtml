@@ -42,15 +42,20 @@
             <tr>
                 <th colspan="1" class="first_col">Short</th>
                 <th colspan="2" class="middle_col">Full URL</th>
-                <th colspan="1" class="middle_col">Created</th>
+                <th colspan="2" class="middle_col">Created</th>
+                <th colspan="1" class="middle_col">Visits</th>
                 <th colspan="1" class="middle_col">User Email</th>
                 <th colspan="1" class="last_col"></th>
             </tr>
             {{ range .URLs }}
                 <tr class="url{{ if .Alter}}1{{ else }}2{{ end }}">
-                    <td colspan="1" class="first_col">&nbsp; {{ .Short }}&nbsp;</td>
-                    <td colspan="2" class="middle_col">&nbsp;{{ .FullURL }}&nbsp;</td>
-                    <td colspan="1" style=" color: #4285F4;" class="middle_col">&nbsp; {{ .Created }}</td>
+                    <td colspan="1" class="first_col">&nbsp; <a
+                                href="https://shorts.ninja{{ .Short }}">shorts.ninja{{ .Short }}</a>&nbsp;
+                    </td>
+                    <td colspan="2" class="middle_col">&nbsp; <a href="{{ .FullURL}}">shorts.ninja{{ .FullURL }}</a>&nbsp;
+                    </td>
+                    <td colspan="2" style=" color: #4285F4;" class="middle_col">&nbsp; {{ .Created }}</td>
+                    <td colspan="1" style=" color: #4285F4;" class="middle_col">&nbsp; {{ .Visits }}</td>
                     <td colspan="1" style=" color: #4285F4;" class="middle_col">&nbsp; {{ .UserEmail }}</td>
                     <th colspan="1" style=" color: #4285F4;" class="last_col">
                         <img style="cursor: pointer" onclick="removeURL('{{ .Short }}')" title="delete url"
