@@ -1,0 +1,61 @@
+{{ define "admin.navbar" }}
+    <style>
+        @font-face {
+            font-family: Sans;
+            src: url("data:font/truetype;charset=utf-8;base64,{{ .FontB64 }}");
+        }
+
+        .navbar {
+            border-collapse: collapse;
+            border-radius: 10px 10px 10px 10px;
+            width: 90%;
+            height: 5%;
+            position: relative;
+            margin: 1% auto auto auto;
+            font-family: Sans;
+        }
+
+        label {
+            color: #0C0C14;
+        }
+
+        .navbar_col:hover {
+            background: #cccccc;
+        }
+
+        .navbar_row {
+            border-radius: 10px;
+        }
+
+        .navbar_col {
+            box-shadow: 0 0 1px 1px #4285F4;
+            width: 10%;
+            cursor: pointer;
+        }
+    </style>
+    <h3 style="color: #4285F4; font-family: Sans" align="center">Hello Captain Baraa, Hope you're having a nice day, if
+        not it's not my problem :) anyway here's your data blyat!</h3>
+    <table class="navbar">
+        <tr class="navbar_row">
+            <th class="navbar_col" onclick="window.open('/admin/users/', '_self')">
+                &nbsp;<label>Users</label>&nbsp;
+            </th>
+
+            <th class="navbar_col" onclick="window.open('/admin/urls/', '_self')">
+                &nbsp;<label>URLs</label>&nbsp;
+            </th>
+
+            <th class="navbar_col" onclick="window.open('/admin/sessions/', '_self')">
+                &nbsp;<label>Sessions</label>&nbsp;
+            </th>
+
+            <th class="navbar_col" onclick="window.open('/', '_self')">
+                &nbsp;<label>Home</label>&nbsp;
+            </th>
+
+            <th class="navbar_col" onclick="window.open('/admin/logout/', '_self')">
+                &nbsp;<label style="color: rgb(222, 11, 75)">Logout</label>&nbsp;
+            </th>
+        </tr>
+    </table>
+{{ end }}

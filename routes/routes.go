@@ -5,6 +5,7 @@ import (
 	"github.com/baraa-almasri/shortsninja/config"
 	"github.com/baraa-almasri/shortsninja/controllers"
 	"github.com/baraa-almasri/shortsninja/models"
+	"github.com/baraa-almasri/shortsninja/utils"
 	"github.com/baraa-almasri/useless"
 	"github.com/gorilla/mux"
 	"html/template"
@@ -23,6 +24,7 @@ type Router struct {
 	googleLoginManager *controllers.GoogleLogin
 	urlValidator       *controllers.URLValidator
 	multiplexer        *mux.Router
+	admin              *controllers.AdminController
 }
 
 // NewRouter returns a new Router instance
@@ -37,6 +39,7 @@ func NewRouter(dbManager models.Database, templates *template.Template, config *
 	uiManager := controllers.NewUIManager(userManager, urlManager, templates, config)
 	urlValidator := controllers.NewURLValidator()
 	googleLogin := controllers.NewGoogleLogin(randomizer, config, requestDataManager, dbManager)
+	admin := controllers.NewAdminController(dbManager, config, utils.NewUniqueID(randomizer), uiManager)
 
 	return &Router{
 		dbMan:              dbManager,
@@ -49,6 +52,7 @@ func NewRouter(dbManager models.Database, templates *template.Template, config *
 		googleLoginManager: googleLogin,
 		urlValidator:       urlValidator,
 		multiplexer:        mux.NewRouter(),
+		admin:              admin,
 	}
 }
 
@@ -57,6 +61,7 @@ func (router *Router) GetRoutes() *mux.Router {
 	router.handleURLOps()
 	router.handleUI()
 	router.handleUserOps()
+	router.handleAdminOps()
 
 	return router.multiplexer
 }
@@ -122,6 +127,7 @@ func (router *Router) handleUI() {
 	router.multiplexer.HandleFunc("/tracking/", router.uiManager.HandleTracking).Methods("GET")
 	router.multiplexer.HandleFunc("/user_info/", router.uiManager.HandleUserInfo).Methods("GET")
 	router.multiplexer.HandleFunc("/url_data/", router.uiManager.HandleURLDataTracking).Methods("GET")
+	router.multiplexer.HandleFunc("/admin/", router.admin.Login).Methods("GET")
 }
 
 func (router *Router) handleUserOps() {
@@ -129,4 +135,12 @@ func (router *Router) handleUserOps() {
 	router.multiplexer.HandleFunc("/login_callback/", router.googleLoginManager.HandleCallback).Methods("GET")
 	router.multiplexer.HandleFunc("/logout/", router.userManager.Logout).Methods("GET")
 	router.multiplexer.HandleFunc("/GTFO/", router.userManager.GTFO).Methods("GET")
+}
+
+func (router *Router) handleAdminOps() {
+	router.multiplexer.HandleFunc("/admin/users/", router.admin.ViewUsers).Methods("GET")
+	router.multiplexer.HandleFunc("/admin/urls/", router.admin.ViewURLs).Methods("GET")
+	router.multiplexer.HandleFunc("/admin/sessions/", router.admin.ViewSessions).Methods("GET")
+	router.multiplexer.HandleFunc("/admin/logout/", router.admin.Logout).Methods("GET")
+	router.multiplexer.HandleFunc("/admin/auth/", router.admin.AuthenticateAdmin).Methods("POST")
 }

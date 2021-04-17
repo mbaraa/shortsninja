@@ -5,4 +5,5 @@ type User struct {
 	Email   string
 	Avatar  string
 	Created string
+	Alter   bool
 }

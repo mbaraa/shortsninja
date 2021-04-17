@@ -299,3 +299,91 @@ func (s *SQLite) GetSession(sess *Session) (*Session, error) {
 	// happily ever after
 	return session, nil
 }
+
+func (s *SQLite) GetUsers() ([]*User, error) {
+	rows, err := s.manager.Query(`SELECT * FROM USER;`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var users []*User
+	var user *User
+	alter := false
+	var timestamp time.Time
+
+	for rows.Next() {
+		user = new(User)
+
+		err = rows.Scan(&user.Email, &user.Avatar, &timestamp)
+		if err != nil {
+			return nil, err
+		}
+		user.Alter = alter
+		user.Created = timestamp.Format("Mon Jan/2/2006 15:04 MST")
+
+		users = append(users, user)
+		alter = !alter
+	}
+
+	// happily ever after
+	return users, nil
+}
+
+func (s *SQLite) GetAllURLs() ([]*URL, error) {
+	rows, err := s.manager.Query(`SELECT * FROM URL;`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var urls []*URL
+	var url *URL
+	alter := false
+	var timestamp time.Time
+
+	for rows.Next() {
+		url = new(URL)
+
+		err = rows.Scan(&url.Short, &url.FullURL, &timestamp, &url.UserEmail)
+		if err != nil {
+			return nil, err
+		}
+		url.Alter = alter
+		url.Created = timestamp.Format("Mon Jan/2/2006 15:04 MST")
+
+		urls = append(urls, url)
+		alter = !alter
+	}
+
+	// happily ever after
+	return urls, nil
+}
+
+func (s *SQLite) GetSessions() ([]*Session, error) {
+	rows, err := s.manager.Query(`SELECT * FROM SESSION;`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var sessions []*Session
+	var session *Session
+	alter := false
+
+	for rows.Next() {
+		session = new(Session)
+
+		err = rows.Scan(&session.UserEmail, &session.Token, &session.ExpiresAt)
+		if err != nil {
+			return nil, err
+		}
+		session.Alter = alter
+
+		sessions = append(sessions, session)
+		alter = !alter
+	}
+
+	// happily ever after
+	return sessions, nil
+}

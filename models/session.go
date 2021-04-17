@@ -7,4 +7,5 @@ type Session struct {
 	UserEmail string
 	Token     string
 	ExpiresAt time.Time
+	Alter     bool
 }

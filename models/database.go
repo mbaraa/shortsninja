@@ -2,23 +2,24 @@ package models
 
 // Database represents a database that can be used for the program
 type Database interface {
-	AddURL(url *URL) error
-	RemoveURL(url *URL) error
+	AddURL(*URL) error
+	RemoveURL(*URL) error
 	GetURL(shortURL string) (*URL, error)
-	GetURLs(user *User) ([]*URL, error)
+	GetURLs(*User) ([]*URL, error)
 
-	AddUser(user *User) error
-	RemoveUser(user *User) error
-	GetUser(user *User) (*User, error)
+	AddUser(*User) error
+	RemoveUser(*User) error
+	GetUser(*User) (*User, error)
 
-	AddURLData(urlData *URLData) error
-	RemoveURLData(url *URL) error
-	GetURLData(url *URL) ([]*URLData, error)
+	AddURLData(*URLData) error
+	RemoveURLData(*URL) error
+	GetURLData(*URL) ([]*URLData, error)
 
-	AddSession(sess *Session) error
-	RemoveSession(sess *Session) error
-	GetSession(sess *Session) (*Session, error)
+	AddSession(*Session) error
+	RemoveSession(*Session) error
+	GetSession(*Session) (*Session, error)
+
+	GetUsers() ([]*User, error)
+	GetAllURLs() ([]*URL, error)
+	GetSessions() ([]*Session, error)
 }
-
-// TODO
-// add admin user functions :)

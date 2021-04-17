@@ -12,6 +12,7 @@ type Config struct {
 	GoogleClientSecret    string
 	GoogleCallbackHandler string
 	IPInfoIoToken         string
+	AdminPassword         string
 }
 
 // LoadConfig loads the configuration from the file `./config.json`
@@ -35,5 +36,6 @@ func LoadConfig() *Config {
 		GoogleClientSecret:    conf["google_client_secret"].(string),
 		GoogleCallbackHandler: conf["google_callback_handler"].(string),
 		IPInfoIoToken:         conf["ipinfo_io_token"].(string),
+		AdminPassword:         conf["admin_password"].(string),
 	}
 }
