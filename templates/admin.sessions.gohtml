@@ -36,24 +36,40 @@
     <body>
 
     {{ template "admin.navbar" . }}
-    <br/>
     {{ if .Sessions }}
+        <h3 style="color: #4285F4; font-family: Sans" align="center">{{ .SessionsCount }} Sessions </h3>
         <table style="font-size: 15px; box-shadow: 0 0 0 0;" class="navbar">
             <tr>
                 <th colspan="2" class="first_col">User Email</th>
                 <th colspan="1" class="middle_col">Token</th>
                 <th colspan="1" class="middle_col">Expires At</th>
-                <th colspan="1" class="last_col">Operations</th>
+                <th colspan="1" class="last_col"></th>
             </tr>
             {{ range .Sessions }}
                 <tr class="session{{ if .Alter}}1{{ else }}2{{ end }}">
                     <td colspan="2" class="first_col">&nbsp; {{ .UserEmail }}&nbsp;</td>
                     <td colspan="1" class="middle_col">&nbsp;{{ .Token }}&nbsp;</td>
                     <td colspan="1" style=" color: #4285F4;" class="middle_col">&nbsp; {{ .ExpiresAt }}</td>
-                    <th colspan="1" style=" color: #4285F4;" class="last_col">&nbsp;CYKA NAHUI BLYAT!!!&nbsp;</th>
+                    <th colspan="1" style=" color: #4285F4;" class="last_col">
+                        <img style="cursor: pointer" onclick="removeSession('{{ .Token }}')" title="delete session"
+                             src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABmJLR0QA/wD/AP+gvaeTAAACg0lEQVRIie2WPWuUURCFn3M3xjWsQYKFBEE3KFiKP8HSSuwVi1ikUFCJ+Q2mED8QLERFFCwsRMSPxsLSv6CYBUFCsJAYkyXZnWPx3v3KvoumsXKK3Tsz586cOffuu68YYY2ZxVO0dYsUB4pIAiJ/95tXAl+eWVp4WVZnbFQDzB0nzwhl1xRrb0fWEroL7LSBpyUBrIMeKbw+SF5V4Dy4ZnxwVJnRDYrigB4cXpq/WAb5Ur++KbgyPFRJg09Hbk9Wm62u36aV90V8PXhjqmxzm1YUHKAf06yOtY5+vrSaU9A4tHjCiafYk5KwjWC6mMJroNVSeqFJkmsYEN96Ca8FnJ1ZWvhYMK5wXMGxTlr5wzYSNXDNLlRzUQwZLHfxNtPdOFCRjgMfE8BWqj43ugx6X+wQoO/APaNlEJLC6K3gtVBYQtIK1j2kFSSEsPiglK5uVqrPIF/qo58vrdYb8zcRb3rj+1m9sTAnuF/QZhW351KbC8APCtaP6o1rc4Gf9KbXu8Nf5m90zmD7ryZLaEhqZm8jyxWVdtoc21PZBFqyIZExamLjkutU3qB7Rft45dhPCo09gAk6Ev1dg7KJsu2FHZUZytjGHhzV+epCbwJsiMiIGCAxskEQSD05Oiboxvb2+ynlImloT2mDlN0RZLoTAAMHGsTQ1B0behb1gD1GXUkGfMDBn+y/RKOZdEn32T+VyHgcwGJ3J721y2OtjfY4kLJE1Zwb37lE5lyjvjiBOZ0j+yqRHkaKwNqfwbONQ4tTts+UVt/eIIjlpNR5ddgHzELfaYiTKOWlAKYQs33PoEAsj2ywMdF8Ufs18djiNKj8/zoiax/5LSavTQvp1VaqPu+H/wZXuyZe7v9ceQAAAABJRU5ErkJggg==">
+                    </th>
                 </tr>
             {{ end }}
         </table>
+        <script>
+            function removeSession(sessionToken) {
+                if (confirm("Are you sure you want to delete the session with token: " + sessionToken +
+                    "\nthis operation is not reversible!")) {
+                    const xhttp = new XMLHttpRequest();
+                    xhttp.open("DELETE", "/admin/sessions/remove/?session=" + sessionToken, false);
+                    xhttp.send();
+
+                    // refresh page after deleting
+                    window.location.reload();
+                }
+            }
+        </script>
     {{ end }}
     </body>
     </html>

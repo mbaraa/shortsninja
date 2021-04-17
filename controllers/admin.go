@@ -83,7 +83,8 @@ func (admin *AdminController) ViewUsers(res http.ResponseWriter, req *http.Reque
 		}
 		admin.ui.renderPageFromUserIP("admin.users", res,
 			mergeMaps(admin.ui.getBasicUserData(new(models.User)), map[string]interface{}{
-				"Users": users,
+				"Users":      users,
+				"UsersCount": len(users),
 			}))
 		return
 	}
@@ -101,7 +102,8 @@ func (admin *AdminController) ViewURLs(res http.ResponseWriter, req *http.Reques
 		}
 		admin.ui.renderPageFromUserIP("admin.urls", res,
 			mergeMaps(admin.ui.getBasicUserData(new(models.User)), map[string]interface{}{
-				"URLs": urls,
+				"URLs":      urls,
+				"URLsCount": len(urls),
 			}))
 		return
 	}
@@ -119,7 +121,8 @@ func (admin *AdminController) ViewSessions(res http.ResponseWriter, req *http.Re
 		}
 		admin.ui.renderPageFromUserIP("admin.sessions", res,
 			mergeMaps(admin.ui.getBasicUserData(new(models.User)), map[string]interface{}{
-				"Sessions": sessions,
+				"Sessions":      sessions,
+				"SessionsCount": len(sessions),
 			}))
 		return
 	}
@@ -135,6 +138,33 @@ func (admin *AdminController) Logout(res http.ResponseWriter, req *http.Request)
 		_ = admin.db.RemoveSession(&models.Session{Token: token.Value})
 	}
 	http.Redirect(res, req, "/", 302)
+}
+
+// RemoveUser deletes a given user from the database
+// DELETE /admin/users/remove/?user=someUser
+//
+func (admin *AdminController) RemoveUser(res http.ResponseWriter, req *http.Request) {
+	if userEmail, ok := req.URL.Query()["user"]; ok && admin.checkToken(req) {
+		_ = admin.db.RemoveUser(&models.User{Email: userEmail[0]})
+	}
+}
+
+// RemoveURL deletes a given URL from the database
+// DELETE /admin/urls/remove/?url=shortURL
+//
+func (admin *AdminController) RemoveURL(res http.ResponseWriter, req *http.Request) {
+	if short, ok := req.URL.Query()["url"]; ok && admin.checkToken(req) {
+		_ = admin.db.RemoveURL(&models.URL{Short: short[0]})
+	}
+}
+
+// RemoveSession deletes a session from the database
+// DELETE /admin/sessions/remove/?session=sessionToken
+//
+func (admin *AdminController) RemoveSession(res http.ResponseWriter, req *http.Request) {
+	if token, ok := req.URL.Query()["session"]; ok && admin.checkToken(req) {
+		_ = admin.db.RemoveSession(&models.Session{Token: token[0]})
+	}
 }
 
 func (admin *AdminController) checkToken(req *http.Request) bool {

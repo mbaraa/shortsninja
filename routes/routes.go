@@ -138,9 +138,12 @@ func (router *Router) handleUserOps() {
 }
 
 func (router *Router) handleAdminOps() {
-	router.multiplexer.HandleFunc("/admin/users/", router.admin.ViewUsers).Methods("GET")
-	router.multiplexer.HandleFunc("/admin/urls/", router.admin.ViewURLs).Methods("GET")
-	router.multiplexer.HandleFunc("/admin/sessions/", router.admin.ViewSessions).Methods("GET")
-	router.multiplexer.HandleFunc("/admin/logout/", router.admin.Logout).Methods("GET")
 	router.multiplexer.HandleFunc("/admin/auth/", router.admin.AuthenticateAdmin).Methods("POST")
+	router.multiplexer.HandleFunc("/admin/users/", router.admin.ViewUsers).Methods("GET")
+	router.multiplexer.HandleFunc("/admin/users/remove/", router.admin.RemoveUser).Methods("DELETE")
+	router.multiplexer.HandleFunc("/admin/urls/", router.admin.ViewURLs).Methods("GET")
+	router.multiplexer.HandleFunc("/admin/urls/remove/", router.admin.RemoveURL).Methods("DELETE")
+	router.multiplexer.HandleFunc("/admin/sessions/", router.admin.ViewSessions).Methods("GET")
+	router.multiplexer.HandleFunc("/admin/sessions/remove/", router.admin.RemoveSession).Methods("DELETE")
+	router.multiplexer.HandleFunc("/admin/logout/", router.admin.Logout).Methods("GET")
 }
