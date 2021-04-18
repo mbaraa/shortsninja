@@ -50,9 +50,9 @@
             {{ range .URLs }}
                 <tr class="url{{ if .Alter}}1{{ else }}2{{ end }}">
                     <td colspan="1" class="first_col">&nbsp; <a
-                                href="https://shorts.ninja{{ .Short }}">shorts.ninja{{ .Short }}</a>&nbsp;
+                                href="https://shorts.ninja/{{ .Short }}">shorts.ninja/{{ .Short }}</a>&nbsp;
                     </td>
-                    <td colspan="2" class="middle_col">&nbsp; <a href="{{ .FullURL}}">shorts.ninja{{ .FullURL }}</a>&nbsp;
+                    <td colspan="2" class="middle_col">&nbsp; <a href="{{ .FullURL}}">{{ .FullURL }}</a>&nbsp;
                     </td>
                     <td colspan="2" style=" color: #4285F4;" class="middle_col">&nbsp; {{ .Created }}</td>
                     <td colspan="1" style=" color: #4285F4;" class="middle_col">&nbsp; {{ .Visits }}</td>
