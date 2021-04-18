@@ -20,7 +20,7 @@ type Router struct {
 	uiManager          *controllers.UIManager
 	urlManager         *controllers.URLManager
 	googleLoginManager *controllers.GoogleLogin
-	urlValidator       *controllers.URLValidator
+	urlValidator       *utils.URLValidator
 	multiplexer        *mux.Router
 	admin              *controllers.AdminController
 }
@@ -32,9 +32,9 @@ func NewRouter(dbManager models.Database, templates *template.Template, config *
 	requestDataManager := controllers.NewRequestDataManager(config, dbManager)
 	userManager := controllers.NewUserManager(dbManager, requestDataManager)
 	urlManager := controllers.NewURLManager(
-		controllers.NewURLValidator(), requestDataManager, userManager, randomizer, dbManager)
+		utils.NewURLValidator(), requestDataManager, userManager, randomizer, dbManager)
 	uiManager := controllers.NewUIManager(userManager, urlManager, templates, config)
-	urlValidator := controllers.NewURLValidator()
+	urlValidator := utils.NewURLValidator()
 	googleLogin := controllers.NewGoogleLogin(randomizer, config, requestDataManager, dbManager)
 	admin := controllers.NewAdminController(dbManager, config, utils.NewUniqueID(randomizer), uiManager)
 
@@ -66,7 +66,7 @@ func (router *Router) GetRoutes() *mux.Router {
 func (router *Router) handleURLOps() {
 	router.multiplexer.HandleFunc("/shorten/", router.urlManager.HandleCreateShortURL).Methods("GET")
 	router.multiplexer.HandleFunc("/no_url/", router.urlManager.HandleRickRoll).Methods("GET")
-	router.multiplexer.HandleFunc("/{[A-Z;0-9;a-z]{4,5}}", router.urlManager.HandleGetFullURL).Methods("GET")
+	router.multiplexer.HandleFunc("/{[A-Z;0-9;a-z]+}", router.urlManager.HandleGetFullURL).Methods("GET")
 	router.multiplexer.HandleFunc("/remove/", router.urlManager.HandleRemoveURL).Methods("DELETE")
 }
 

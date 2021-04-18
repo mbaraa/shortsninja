@@ -10,7 +10,7 @@ import (
 
 // URLManager holds URL operations handlers
 type URLManager struct {
-	urlValidator *URLValidator
+	urlValidator *utils.URLValidator
 	reqData      *RequestDataManager
 	userManager  *UserManager
 	randomizer   *useless.RandASCII
@@ -19,7 +19,7 @@ type URLManager struct {
 }
 
 // NewURLManager returns a new URLManager instance
-func NewURLManager(urlValidator *URLValidator, requestDataManager *RequestDataManager,
+func NewURLManager(urlValidator *utils.URLValidator, requestDataManager *RequestDataManager,
 	userManager *UserManager, randomStringGenerator *useless.RandASCII, db models.Database) *URLManager {
 	return &URLManager{
 		urlValidator: urlValidator,

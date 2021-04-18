@@ -1,4 +1,4 @@
-package controllers
+package utils
 
 import (
 	"regexp"
@@ -24,6 +24,6 @@ func (*URLValidator) IsURLValid(url string) bool {
 
 // IsShortURLValid returns true when the short url is valid
 func (*URLValidator) IsShortURLValid(short string) bool {
-	shortURLPattern, _ := regexp.Compile(`[A-Z0-9a-z\-]{4,5}`)
+	shortURLPattern, _ := regexp.Compile(`[A-Z0-9a-z\-]+`)
 	return short == shortURLPattern.FindString(short)
 }
