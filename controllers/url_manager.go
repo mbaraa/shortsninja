@@ -36,16 +36,33 @@ func NewURLManager(urlValidator *URLValidator, requestDataManager *RequestDataMa
 //
 func (um *URLManager) HandleCreateShortURL(res http.ResponseWriter, req *http.Request) {
 	user := um.userManager.GetUserFromRequest(req)
-	url := req.URL.Query()["url"][0]
+	url, validQuery := req.URL.Query()["url"]
+	shortURL, validQuery2 := req.URL.Query()["short"]
 
 	resp := make(map[string]interface{})
-	if resp["valid_url"] = um.urlValidator.IsURLValid(url); resp["valid_url"].(bool) {
-		shortURL := um.createShortURL(url, user)
-
-		resp["url"] = url
-		resp["short"] = "shorts.ninja/" + shortURL
+	if resp["valid_url"] = um.urlValidator.IsURLValid(url[0]); validQuery && resp["valid_url"].(bool) {
+		if validQuery2 {
+			resp["short_exists"] = !um.createCustomShortURL(url[0], shortURL[0], user)
+		} else {
+			shortURL = make([]string, 1)
+			shortURL[0] = um.createShortURL(url[0], user)
+		}
+		resp["url"] = url[0]
+		resp["short"] = "shorts.ninja/" + shortURL[0]
 	}
 	_ = json.NewEncoder(res).Encode(resp)
+}
+
+// createCustomShortURL creates a short url from the given custom short URL,
+// returns true if the custom URL doesn't exist and false otherwise
+//
+func (um *URLManager) createCustomShortURL(url, short string, user *models.User) bool {
+	err := um.db.AddURL(&models.URL{
+		Short:     short,
+		FullURL:   url,
+		UserEmail: user.Email,
+	})
+	return err == nil
 }
 
 // createShortURL creates and adds a new short URL handler to the database

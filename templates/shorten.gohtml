@@ -29,10 +29,12 @@
         <tr>
             <td>
                 <br/>
-                <form onsubmit="shorten(url.value); return false;">
-                    <input style="height: 40px; width: 60%; font-size: 20px; margin-left: 2%" autofocus
+                <form onsubmit="shorten(url.value, short.value); return false;">
+                    <input style="height: 40px; width: 60%; font-size: 17px; margin-left: 2%" autofocus
                            type="text" name="url" placeholder="Type/Paste a URL to be shortened!">
-                    <input style="height: 45px; width: min-content; font-size: 25px"
+                    <input style="height: 40px; width: 17%; font-size: 17px;"
+                           type="text" name="short" placeholder="Custom Short URL">
+                    <input style="height: 45px; width: min-content; font-size: 20px"
                            type="submit" value="Shorten">
                     <br/><br/>
                     <input style="height: 25px; font-size: 17px; margin-left: 2%; margin-right: 2%" type="button"
@@ -47,13 +49,24 @@
     </table>
 
     <script>
-        function shorten(url) {
+        function shorten(url, short) {
+            let requestURL = `?url=${url}`;
+            if (short !== "") {
+                requestURL += `&short=${short}`;
+            }
+            requestURL = `/shorten/${requestURL}`;
+
             const xhttp = new XMLHttpRequest();
-            xhttp.open("GET", "/shorten/?url=" + url, false);
+            xhttp.open("GET", requestURL, false);
             xhttp.send();
 
             const resp = JSON.parse(xhttp.responseText);
             if (resp["valid_url"]) {
+
+                if (resp["short_exists"]) {
+                    window.alert("short handler exists!");
+                    return;
+                }
                 const short = document.getElementById("short");
                 short.href = "https://" + resp["short"];
                 short.textContent = resp["short"];
