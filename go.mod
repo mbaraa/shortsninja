@@ -4,7 +4,6 @@ go 1.15
 
 require (
 	github.com/baraa-almasri/useless v0.0.0-20210304175853-c5acd8fbd500
-	github.com/google/uuid v1.2.0
 	github.com/gorilla/mux v1.8.0
 	github.com/mattn/go-sqlite3 v1.14.6
 	github.com/rs/cors v1.7.0

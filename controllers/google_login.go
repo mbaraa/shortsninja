@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"github.com/baraa-almasri/shortsninja/config"
 	"github.com/baraa-almasri/shortsninja/models"
+	"github.com/baraa-almasri/shortsninja/utils"
 	"github.com/baraa-almasri/useless"
-	"github.com/google/uuid"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 	"net/http"
@@ -20,7 +20,7 @@ type GoogleLogin struct {
 	randomizer        *useless.RandASCII
 	config            *config.Config
 	reqData           *RequestDataManager
-	dbMan             models.Database
+	db                models.Database
 }
 
 // NewGoogleLogin returns a new GoogleLogin instance
@@ -38,7 +38,7 @@ func NewGoogleLogin(randomizer *useless.RandASCII, config *config.Config,
 		randomizer: randomizer,
 		config:     config,
 		reqData:    requestDataManager,
-		dbMan:      dbManager,
+		db:         dbManager,
 	}
 }
 
@@ -72,10 +72,10 @@ func (g *GoogleLogin) HandleCallback(w http.ResponseWriter, r *http.Request) {
 	data := make(map[string]interface{})
 	json.NewDecoder(dataResponse.Body).Decode(&data)
 
-	token1 := uuid.New().String()
-	expireTime := time.Now().AddDate(0, 1, 1)
+	token1 := utils.NewUniqueID(g.randomizer).GetUniqueString(27)
+	expireTime := time.Now().AddDate(0, 1, 0)
 
-	_ = g.dbMan.AddSession(&models.Session{
+	_ = g.db.AddSession(&models.Session{
 		UserEmail: data["email"].(string),
 		Token:     token1,
 		ExpiresAt: expireTime,
@@ -88,7 +88,7 @@ func (g *GoogleLogin) HandleCallback(w http.ResponseWriter, r *http.Request) {
 		Path:    "/",
 	})
 
-	_ = g.dbMan.AddUser(&models.User{
+	_ = g.db.AddUser(&models.User{
 		Email:  data["email"].(string),
 		Avatar: data["picture"].(string),
 	})
