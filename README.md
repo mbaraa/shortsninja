@@ -86,7 +86,7 @@ If the previous URL is called again, the response will have the short URL alongs
 
 Opens a URL using its short handler `if exists 😉`, otherwise it rickrolls the caller so be careful using it!
 
-eg: `curl -XGET -k https://shorts.ninja/JzaW9`
+eg: `curl -XGET https://shorts.ninja/JzaW9`
 
 the response body is just an HTML with the target URL so when opened in the browser it automatically goes to the URL
 
@@ -96,7 +96,7 @@ the response body is just an HTML with the target URL so when opened in the brow
 
 ---
 
-### Dependencies 📚 
+# Dependencies 📚 
 
 - [gorilla-mux](github.com/gorilla/mux) to handle a regex endpoint
 - [go-sqlite3](github.com/mattn/go-sqlite3) a small database for small data
@@ -106,7 +106,7 @@ the response body is just an HTML with the target URL so when opened in the brow
 
 --- 
 
-### Run Locally 🖥️
+# Run Locally 🖥️
 - Clone the repo 
 - Change admin password in `config.json`
 - `optional` add your *google cloud api* and *ipinfo.io* tokens
