@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	"github.com/baraa-almasri/shortsninja/models"
+	"github.com/mbaraa/shortsninja/models"
 	"net/http"
 	"time"
 )

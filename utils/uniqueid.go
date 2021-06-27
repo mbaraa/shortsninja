@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"github.com/baraa-almasri/useless"
+	"github.com/mbaraa/useless"
 	"time"
 )
 

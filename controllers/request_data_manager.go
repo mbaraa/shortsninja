@@ -3,8 +3,8 @@ package controllers
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/baraa-almasri/shortsninja/config"
-	"github.com/baraa-almasri/shortsninja/models"
+	"github.com/mbaraa/shortsninja/config"
+	"github.com/mbaraa/shortsninja/models"
 	"net/http"
 	"strings"
 )

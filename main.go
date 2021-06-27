@@ -1,9 +1,9 @@
 package main
 
 import (
-	"github.com/baraa-almasri/shortsninja/config"
-	"github.com/baraa-almasri/shortsninja/models"
-	"github.com/baraa-almasri/shortsninja/routes"
+	"github.com/mbaraa/shortsninja/config"
+	"github.com/mbaraa/shortsninja/models"
+	"github.com/mbaraa/shortsninja/routes"
 	"github.com/rs/cors"
 	"html/template"
 	"log"

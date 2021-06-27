@@ -2,10 +2,11 @@ package models
 
 import (
 	"database/sql"
-	"github.com/baraa-almasri/shortsninja/utils"
-	_ "github.com/mattn/go-sqlite3"
 	"strings"
 	"time"
+
+	_ "github.com/mattn/go-sqlite3"
+	"github.com/mbaraa/shortsninja/utils"
 )
 
 // SQLite represents a sqlite database for the program
@@ -53,7 +54,8 @@ func mustInitSQLiteDB(db *sql.DB) {
     	full_url VARCHAR(2000),
     	created_at TIMESTAMP,
     	user_email VARCHAR(255),
-    	visits INTEGER
+    	visits INTEGER,
+		IP VARCHAR(45)
 	);`)
 	if err != nil {
 		panic(err)
@@ -86,8 +88,8 @@ func mustInitSQLiteDB(db *sql.DB) {
 //
 func (s *SQLite) AddURL(url *URL) error {
 	_, err := s.manager.Exec(
-		`INSERT INTO URL (short, full_url, created_at, user_email, visits) VALUES (?, ? , CURRENT_TIMESTAMP, ?, 0);`,
-		url.Short, url.FullURL, url.UserEmail)
+		`INSERT INTO URL (short, full_url, created_at, user_email, visits, IP) VALUES (?, ? , CURRENT_TIMESTAMP, ?, 0, NULL);`,
+		url.Short, url.FullURL, url.UserEmail, url.VisitIP)
 	if err != nil {
 		return err
 	}
@@ -132,7 +134,7 @@ func (s *SQLite) GetURL(shortURL string) (*URL, error) {
 	url := new(URL)
 	rows.Next()
 	var timeStamp time.Time
-	err = rows.Scan(&url.Short, &url.FullURL, &timeStamp, &url.UserEmail, &url.Visits)
+	err = rows.Scan(&url.Short, &url.FullURL, &timeStamp, &url.UserEmail, &url.Visits, &url.VisitIP)
 	url.Created = (new(utils.TimeDurationFormatter)).GetDurationSince(timeStamp.Unix())
 	if err != nil {
 		return nil, err
@@ -161,7 +163,7 @@ func (s *SQLite) GetURLs(user *User) ([]*URL, error) {
 		url = new(URL)
 
 		url.Alter = alter
-		err = rows.Scan(&url.Short, &url.FullURL, &timeStamp, &url.UserEmail, &url.Visits)
+		err = rows.Scan(&url.Short, &url.FullURL, &timeStamp, &url.UserEmail, &url.Visits, &url.VisitIP)
 		if err != nil {
 			return nil, err
 		}

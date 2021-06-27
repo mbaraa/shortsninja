@@ -1,10 +1,11 @@
 package controllers
 
 import (
-	"github.com/baraa-almasri/shortsninja/config"
-	"github.com/baraa-almasri/shortsninja/models"
 	"html/template"
 	"net/http"
+
+	"github.com/mbaraa/shortsninja/config"
+	"github.com/mbaraa/shortsninja/models"
 )
 
 // UIManager holds the UI handlers
@@ -49,9 +50,9 @@ func (ui *UIManager) HandleTracking(res http.ResponseWriter, req *http.Request) 
 func (ui *UIManager) HandleURLDataTracking(res http.ResponseWriter, req *http.Request) {
 	user := ui.userManager.GetUserFromRequest(req)
 	var urlData []*models.URLData
-
-	if shortURL := req.URL.Query()["short"]; user != nil && shortURL != nil {
-		url := ui.urlManager.getFullURL(shortURL[0])
+	var shortURL string
+	if shortURL = req.URL.Query()["short"][0]; user != nil && shortURL != "" {
+		url := ui.urlManager.getFullURL(shortURL)
 		if user.Email != url.UserEmail {
 			goto ignoreData
 		}
@@ -60,6 +61,7 @@ func (ui *UIManager) HandleURLDataTracking(res http.ResponseWriter, req *http.Re
 
 ignoreData:
 	ui.renderPageFromUserIP("url_data", res, mergeMaps(ui.getBasicUserData(user), map[string]interface{}{
+		"Short":   shortURL,
 		"URLData": urlData,
 	}))
 }

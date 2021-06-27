@@ -8,4 +8,5 @@ type URL struct {
 	Visits    int
 	UserEmail string
 	Alter     bool
+	VisitIP   string
 }

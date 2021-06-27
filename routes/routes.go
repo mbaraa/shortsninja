@@ -1,12 +1,12 @@
 package routes
 
 import (
-	"github.com/baraa-almasri/shortsninja/config"
-	"github.com/baraa-almasri/shortsninja/controllers"
-	"github.com/baraa-almasri/shortsninja/models"
-	"github.com/baraa-almasri/shortsninja/utils"
-	"github.com/baraa-almasri/useless"
 	"github.com/gorilla/mux"
+	"github.com/mbaraa/shortsninja/config"
+	"github.com/mbaraa/shortsninja/controllers"
+	"github.com/mbaraa/shortsninja/models"
+	"github.com/mbaraa/shortsninja/utils"
+	"github.com/mbaraa/useless"
 	"html/template"
 )
 

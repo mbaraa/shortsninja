@@ -2,9 +2,9 @@ package controllers
 
 import (
 	"encoding/json"
-	"github.com/baraa-almasri/shortsninja/models"
-	"github.com/baraa-almasri/shortsninja/utils"
-	"github.com/baraa-almasri/useless"
+	"github.com/mbaraa/shortsninja/models"
+	"github.com/mbaraa/shortsninja/utils"
+	"github.com/mbaraa/useless"
 	"net/http"
 )
 
